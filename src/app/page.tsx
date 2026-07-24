@@ -15,12 +15,12 @@ export default function Home() {
           >
             Login
           </a>
-          <a
+          {/* <a
             href="/pos"
             className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
           >
             POS Demo
-          </a>
+          </a> */}
         </div>
       </div>
     </main>

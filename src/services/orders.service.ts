@@ -9,6 +9,7 @@ export interface Order {
     firstName: string;
     lastName?: string;
     name?: string;
+    phone?: string;
   };
   userId: string;
   user?: {
@@ -72,38 +73,68 @@ export interface Payment {
 
 export const ordersService = {
   async findAll(): Promise<Order[]> {
-    const response = await axios.get('/orders');
-    return response.data;
+    try {
+      const response = await axios.get('/orders');
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch orders';
+      throw new Error(errorMessage);
+    }
   },
 
   async findOne(id: string): Promise<Order> {
-    const response = await axios.get(`/orders/${id}`);
-    return response.data;
+    try {
+      const response = await axios.get(`/orders/${id}`);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch order';
+      throw new Error(errorMessage);
+    }
   },
 
   async create(data: Partial<Order>): Promise<Order> {
-    const response = await axios.post('/orders', data);
-    return response.data;
+    try {
+      const response = await axios.post('/orders', data);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create order';
+      throw new Error(errorMessage);
+    }
   },
 
   async update(id: string, data: Partial<Order>): Promise<Order> {
-    const response = await axios.patch(`/orders/${id}`, data);
-    return response.data;
+    try {
+      const response = await axios.patch(`/orders/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update order';
+      throw new Error(errorMessage);
+    }
   },
 
   async remove(id: string): Promise<void> {
-    await axios.delete(`/orders/${id}`);
+    try {
+      await axios.delete(`/orders/${id}`);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete order';
+      throw new Error(errorMessage);
+    }
   },
 
   async getOrdersByUserAndDateRange(userId: string, startDate: Date, endDate?: Date): Promise<Order[]> {
-    const params: any = {
-      userId,
-      startDate: startDate.toISOString(),
-    };
-    if (endDate) {
-      params.endDate = endDate.toISOString();
+    try {
+      const params: any = {
+        userId,
+        startDate: startDate.toISOString(),
+      };
+      if (endDate) {
+        params.endDate = endDate.toISOString();
+      }
+      const response = await axios.get('/orders', { params });
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch orders by date range';
+      throw new Error(errorMessage);
     }
-    const response = await axios.get('/orders', { params });
-    return response.data;
   },
 };

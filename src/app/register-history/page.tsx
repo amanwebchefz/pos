@@ -276,7 +276,7 @@ export default function RegisterHistoryPage() {
                               <span className="text-sm text-red-500">{formatCurrency(register.difference)}</span>
                             </>
                           ) : (
-                            <span className="text-sm text-gray-400">-</span>
+                            <span className="text-sm text-gray-400">0</span>
                           )}
                         </div>
                       </td>

@@ -9,10 +9,11 @@ class SocketService {
     if (!this.socket) {
       this.socket = io(this.SERVER_URL, {
         transports: ['websocket', 'polling'],
+        withCredentials: true,
       });
 
       this.socket.on('connect', () => {
-        console.log('Connected to Socket.io server');
+        console.log('Connected to Socket.io server with ID:', this.socket?.id);
         if (userId) {
           this.joinRoom(userId);
         }
@@ -25,6 +26,9 @@ class SocketService {
       this.socket.on('connect_error', (error) => {
         console.error('Socket connection error:', error);
       });
+    } else if (userId && this.currentUserId !== userId) {
+      // If socket exists but userId changed, join new room
+      this.joinRoom(userId);
     }
 
     return this.socket;
@@ -62,13 +66,17 @@ class SocketService {
 
   emitCartUpdate(cartData: any): void {
     if (this.socket) {
+      console.log('Emitting cart update:', cartData);
       this.socket.emit('cart-update', cartData);
+    } else {
+      console.error('Socket not connected, cannot emit cart update');
     }
   }
 
   onCartUpdate(callback: (data: any) => void): void {
     if (this.socket) {
       this.socket.on('cart-update', callback);
+      console.log('Listening for cart updates');
     }
   }
 

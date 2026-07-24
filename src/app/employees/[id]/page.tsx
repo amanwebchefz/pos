@@ -4,14 +4,16 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/authStore';
 import { employeesService, Employee, EmployeeStats } from '../../../services/employees.service';
-import { ArrowLeft, Mail, Phone, Building2, Shield, Calendar, User, DollarSign, ShoppingCart, TrendingUp, Clock } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Building2, Shield, Calendar, User, DollarSign, ShoppingCart, TrendingUp, Clock, Trash2 } from 'lucide-react';
 
 export default function EmployeeDetailPage() {
   const router = useRouter();
-  const { isAuthenticated, _hasHydrated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated, user } = useAuthStore();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const isAdmin = user?.role?.name === 'ADMIN' || user?.role?.name === 'SUPER_ADMIN';
 
   useEffect(() => {
     if (!_hasHydrated) return; // Wait for Zustand persist to hydrate from localStorage
@@ -48,6 +50,23 @@ export default function EmployeeDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    const id = window.location.pathname.split('/').pop();
+    if (!id) return;
+
+    if (!confirm(`Are you sure you want to delete ${employee?.firstName} ${employee?.lastName}?`)) {
+      return;
+    }
+
+    try {
+      await employeesService.remove(id);
+      router.push('/customers');
+    } catch (error) {
+      console.error('Failed to delete employee:', error);
+      alert('Failed to delete employee. Please try again.');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -69,17 +88,35 @@ export default function EmployeeDetailPage() {
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/customers')}
-              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold">Employee Details</h1>
-              <p className="text-gray-400">View employee information and performance</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/customers')}
+                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold">Employee Details</h1>
+                <p className="text-gray-400">View employee information and performance</p>
+              </div>
             </div>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => router.push(`/employees/${window.location.pathname.split('/').pop()}/edit`)}
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+                >
+                  Edit Employee
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>

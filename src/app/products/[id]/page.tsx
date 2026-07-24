@@ -4,15 +4,17 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { productsService, Product } from '@/services/products.service';
-import { ArrowLeft, Edit, Trash2, Package, DollarSign, Box, Barcode } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Package, DollarSign, Box, Barcode, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
+import BarcodeComponent from 'react-barcode';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const { user, isAuthenticated, _hasHydrated } = useAuthStore();
+  const { user, isAuthenticated, _hasHydrated, hasPermission } = useAuthStore();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [barcodeCount, setBarcodeCount] = useState(1);
   const { id } = use(params);
 
   useEffect(() => {
@@ -30,9 +32,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     try {
       const data = await productsService.findOne(id);
       setProduct(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load product:', error);
-      toast.error('Failed to load product');
+      toast.error(error.message || 'Failed to load product');
       router.push('/products');
     } finally {
       setIsLoading(false);
@@ -49,12 +51,74 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       await productsService.remove(id);
       toast.success('Product deleted successfully');
       router.push('/products');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete product:', error);
-      toast.error('Failed to delete product');
+      toast.error(error.message || 'Failed to delete product');
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handlePrintBarcodes = () => {
+    if (!product?.barcode) {
+      toast.error('No barcode available for this product');
+      return;
+    }
+
+    if (barcodeCount < 1 || barcodeCount > 100) {
+      toast.error('Please enter a number between 1 and 100');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error('Please allow popups to print barcodes');
+      return;
+    }
+
+    const barcodeHTML = Array.from({ length: barcodeCount }, () => `
+      <div style="border: 1px solid #ccc; padding: 10px; margin: 10px; text-align: center; display: inline-block; width: 200px;">
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">${product.name}</div>
+        <div id="barcode-${product.barcode}"></div>
+        <div style="font-size: 12px; margin-top: 5px;">${product.barcode}</div>
+      </div>
+    `).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Print Barcodes - ${product.name}</title>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          @media print {
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        ${barcodeHTML}
+        <script>
+          ${Array.from({ length: barcodeCount }, (_, i) => `
+            JsBarcode("#barcode-${product.barcode}", "${product.barcode}", {
+              format: "CODE128",
+              width: 2,
+              height: 50,
+              displayValue: false
+            });
+          `).join('')}
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() {
+              window.close();
+            };
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   if (!_hasHydrated) {
@@ -101,21 +165,25 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{product.name}</h1>
             <div className="flex gap-3">
-              <button
-                onClick={() => router.push(`/products/${product.id}/edit`)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
-                <Edit className="w-4 h-4" />
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                <Trash2 className="w-4 h-4" />
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </button>
+              {hasPermission('products.update') && (
+                <button
+                  onClick={() => router.push(`/products/${product.id}/edit`)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </button>
+              )}
+              {hasPermission('products.delete') && (
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -240,6 +308,52 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   <p className="text-sm text-gray-500 dark:text-gray-400">{product.unit?.abbreviation || ''}</p>
                 </div>
               </div>
+            </div>
+
+            {/* Barcode */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Barcode className="w-5 h-5" />
+                Barcode
+              </h2>
+              {product.barcode ? (
+                <div className="space-y-4">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 flex justify-center">
+                    <BarcodeComponent 
+                      value={product.barcode} 
+                      format="CODE128"
+                      width={2}
+                      height={50}
+                      displayValue={true}
+                      fontSize={14}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Barcode Number</p>
+                    <p className="text-lg font-mono font-bold text-gray-900 dark:text-white">{product.barcode}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Number of barcodes to print</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={barcodeCount}
+                      onChange={(e) => setBarcodeCount(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                      onClick={handlePrintBarcodes}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+                    >
+                      <Printer className="w-4 h-4" />
+                      Print Barcodes
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">No barcode assigned to this product</p>
+              )}
             </div>
           </div>
         </div>

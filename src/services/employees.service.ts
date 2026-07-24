@@ -65,6 +65,16 @@ export const employeesService = {
     return response.data;
   },
 
+  async update(id: string, data: CreateEmployeeDto): Promise<Employee> {
+    const response = await axios.patch(`/users/${id}`, data);
+    return response.data;
+  },
+
+  async remove(id: string): Promise<{ message: string }> {
+    const response = await axios.delete(`/users/${id}`);
+    return response.data;
+  },
+
   async getRolesUser(): Promise<Role[]> {
     const response = await axios.get('/users/role/data');
     return response.data;

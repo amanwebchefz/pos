@@ -88,7 +88,7 @@ export default function OrdersPage() {
                 className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-                Back to Dashboard
+                {/* Back to Dashboard */}
               </button>
               <div className="border-l border-gray-700 pl-4">
                 <h1 className="text-2xl font-bold">Orders</h1>
@@ -201,12 +201,12 @@ export default function OrdersPage() {
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => handleDelete(order.id)}
                         className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </button> */}
                     </div>
                   </td>
                 </tr>

@@ -22,9 +22,12 @@ export default function NewProductPage() {
     costPrice: '',
     stock: '',
     categoryId: '',
+    categoryName: '',
     sku: '',
     barcode: '',
   });
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     if (!_hasHydrated) return;
@@ -66,6 +69,28 @@ export default function NewProductPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleCategoryInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData({ ...formData, categoryName: value, categoryId: '' });
+    
+    if (value.length > 0) {
+      const filtered = categories.filter(cat =>
+        cat.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredCategories(filtered);
+      setShowCategoryDropdown(filtered.length > 0);
+    } else {
+      setShowCategoryDropdown(false);
+      setFilteredCategories([]);
+    }
+  };
+
+  const handleCategorySelect = (category: Category) => {
+    setFormData({ ...formData, categoryName: category.name, categoryId: category.id });
+    setShowCategoryDropdown(false);
+    setFilteredCategories([]);
+  };
+
   const generateBarcode = () => {
     // Generate a random 12-digit barcode
     const barcode = Math.floor(100000000000 + Math.random() * 900000000000).toString();
@@ -77,12 +102,34 @@ export default function NewProductPage() {
     setIsLoading(true);
 
     try {
+      let categoryId = formData.categoryId;
+      
+      // If user typed a category name
+      if (formData.categoryName) {
+        // Check if category already exists
+        const existingCategory = categories.find(
+          cat => cat.name.toLowerCase() === formData.categoryName.toLowerCase()
+        );
+        
+        if (existingCategory) {
+          // Use existing category
+          categoryId = existingCategory.id;
+        } else {
+          // Create new category
+          const newCategory = await categoriesService.create({
+            name: formData.categoryName,
+            description: '',
+          });
+          categoryId = newCategory.id;
+        }
+      }
+
       const productData = {
         ...formData,
         sellingPrice: parseFloat(formData.sellingPrice),
         costPrice: parseFloat(formData.costPrice),
         stock: parseInt(formData.stock) || 0,
-        categoryId: formData.categoryId || undefined,
+        categoryId: categoryId || undefined,
       };
 
       await productsService.create(productData);
@@ -105,7 +152,7 @@ export default function NewProductPage() {
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back to Products
+            {/* Back to Products */}
           </button>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Add New Product</h1>
         </div>
@@ -148,24 +195,43 @@ export default function NewProductPage() {
                 />
               </div>
 
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Category
                 </label>
-                <select
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleChange}
-                  disabled={isLoadingCategories}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  name="categoryName"
+                  value={formData.categoryName}
+                  onChange={handleCategoryInputChange}
+                  onFocus={() => {
+                    if (formData.categoryName) {
+                      const filtered = categories.filter(cat =>
+                        cat.name.toLowerCase().includes(formData.categoryName.toLowerCase())
+                      );
+                      setFilteredCategories(filtered);
+                      setShowCategoryDropdown(filtered.length > 0);
+                    }
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowCategoryDropdown(false), 200);
+                  }}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Select or type a category"
+                />
+                {showCategoryDropdown && filteredCategories.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {filteredCategories.map((category) => (
+                      <div
+                        key={category.id}
+                        onClick={() => handleCategorySelect(category)}
+                        className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                      >
+                        {category.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {isLoadingCategories && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Loading categories...</p>
                 )}

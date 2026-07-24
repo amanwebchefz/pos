@@ -7,10 +7,11 @@ import { productsService, Product } from '@/services/products.service';
 import { categoriesService, Category } from '@/services/categories.service';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { PermissionGuard } from '@/components/guards/PermissionGuard';
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const { user, isAuthenticated, _hasHydrated } = useAuthStore();
+  const { user, isAuthenticated, _hasHydrated, hasPermission } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -36,9 +37,16 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       return;
     }
 
+    // Check if user has permission to edit products
+    if (!hasPermission('products.update')) {
+      toast.error('You do not have permission to edit products');
+      router.push('/products');
+      return;
+    }
+
     loadProduct();
     loadCategories();
-  }, [isAuthenticated, router, _hasHydrated, id]);
+  }, [isAuthenticated, router, _hasHydrated, id, hasPermission]);
 
   const loadProduct = async () => {
     try {
@@ -46,7 +54,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       // Get stock from inventory if available
       const stockQuantity = data.inventory && data.inventory.length > 0
         ? data.inventory.reduce((sum: number, inv: any) => sum + inv.quantity, 0)
-        : data?.lowStockAlert.toString();
+        : '0';
       setFormData({
         name: data.name,
         description: data.description || '',
@@ -57,9 +65,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         barcode: data.barcode || '',
         stock: stockQuantity.toString(),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load product:', error);
-      toast.error('Failed to load product');
+      toast.error(error.message || 'Failed to load product');
       router.push('/products');
     } finally {
       setIsLoading(false);
@@ -71,8 +79,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     try {
       const data = await categoriesService.findAll();
       setCategories(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load categories:', error);
+      toast.error(error.message || 'Failed to load categories');
     } finally {
       setIsLoadingCategories(false);
     }
@@ -105,7 +114,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       toast.success('Product updated successfully');
       router.push(`/products/${id}`);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to update product');
+      toast.error(error.message || 'Failed to update product');
     } finally {
       setIsSaving(false);
     }

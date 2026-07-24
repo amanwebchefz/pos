@@ -27,26 +27,51 @@ export interface Customer {
 
 export const customersService = {
   async findAll(): Promise<Customer[]> {
-    const response = await axios.get('/customers');
-    return response.data;
+    try {
+      const response = await axios.get('/customers');
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch customers';
+      throw new Error(errorMessage);
+    }
   },
 
   async findOne(id: string): Promise<Customer> {
-    const response = await axios.get(`/customers/${id}`);
-    return response.data;
+    try {
+      const response = await axios.get(`/customers/${id}`);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch customer';
+      throw new Error(errorMessage);
+    }
   },
 
   async create(data: Partial<Customer>): Promise<Customer> {
-    const response = await axios.post('/customers', data);
-    return response.data;
+    try {
+      const response = await axios.post('/customers', data);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create customer';
+      throw new Error(errorMessage);
+    }
   },
 
   async update(id: string, data: Partial<Customer>): Promise<Customer> {
-    const response = await axios.patch(`/customers/${id}`, data);
-    return response.data;
+    try {
+      const response = await axios.patch(`/customers/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update customer';
+      throw new Error(errorMessage);
+    }
   },
 
   async remove(id: string): Promise<void> {
-    await axios.delete(`/customers/${id}`);
+    try {
+      await axios.delete(`/customers/${id}`);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete customer';
+      throw new Error(errorMessage);
+    }
   },
 };

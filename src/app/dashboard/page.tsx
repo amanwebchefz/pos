@@ -18,7 +18,9 @@ import {
   LogOut,
   Lock,
   Unlock,
+  Settings,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -39,8 +41,7 @@ export default function DashboardPage() {
 
   // Check if user is owner (ADMIN or SUPER_ADMIN)
   const isOwner = getRoleName(user?.role) === 'ADMIN' || getRoleName(user?.role) === 'SUPER_ADMIN';
-  console.log('user',user)
-console.log('isOwner>>>>>>>>',isOwner)
+  const isManager = getRoleName(user?.role) === 'MANAGER';
 
   useEffect(() => {
     if (!_hasHydrated) return; // Wait for Zustand persist to hydrate from localStorage
@@ -82,14 +83,14 @@ console.log('isOwner>>>>>>>>',isOwner)
 
   const handleLogout = async () => {
     if (activeRegister) {
-      alert('Please close your cash register before logging out.');
+      toast.error('Please close your cash register before logging out.');
       return;
     }
     try {
       logout();
       router.push('/login');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to logout');
+      toast.error(error.response?.data?.message || 'Failed to logout');
     }
   };
 
@@ -119,13 +120,22 @@ console.log('isOwner>>>>>>>>',isOwner)
               <h1 className="text-2xl font-bold">Dashboard</h1>
               <p className="text-gray-400">Welcome back, {user?.firstName}</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              Logout
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                Logout
+              </button>
+              <button
+                onClick={() => router.push('/settings')}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                <Settings className="w-5 h-5" />
+                Settings
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -208,12 +218,14 @@ console.log('isOwner>>>>>>>>',isOwner)
               color="bg-purple-500"
             />
           )} */}
-          <StatCard
-            title="Total Products"
-            value={stats?.totalProducts || 0}
-            icon={<Package className="w-6 h-6" />}
-            color="bg-orange-500"
-          />
+           {(isOwner || isManager) && (
+              <StatCard
+              title="Total Products"
+              value={stats?.totalProducts || 0}
+              icon={<Package className="w-6 h-6" />}
+              color="bg-orange-500"
+            />
+          )}
         </div>
 
         {/* Today's Stats */}
@@ -234,12 +246,12 @@ console.log('isOwner>>>>>>>>',isOwner)
 
         {/* Alerts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AlertCard
+          {/* <AlertCard
             title="Low Stock Products"
             count={stats?.lowStockProducts || 0}
             icon={<AlertCircle className="w-6 h-6" />}
             color="bg-yellow-500"
-          />
+          /> */}
           <AlertCard
             title="Pending Orders"
             count={stats?.pendingOrders || 0}
@@ -257,16 +269,19 @@ console.log('isOwner>>>>>>>>',isOwner)
               icon={<ShoppingCart className="w-6 h-6" />}
               onClick={() => router.push('/pos')}
             />
-            <QuickActionButton
-              title="Products"
-              icon={<Package className="w-6 h-6" />}
-              onClick={() => router.push('/products')}
-            />
+            {(isOwner || isManager) && (
+              <QuickActionButton
+                title="Products"
+                icon={<Package className="w-6 h-6" />}
+                onClick={() => router.push('/products')}
+              />
+            )}
             {isOwner && (
               <QuickActionButton
                 title="Employees"
                 icon={<Users className="w-6 h-6" />}
-                onClick={() => router.push('/customers')}
+                onClick={() => router.push('/employees')}
+                // onClick={() => router.push('/customers')}
               />
             )}
             <QuickActionButton

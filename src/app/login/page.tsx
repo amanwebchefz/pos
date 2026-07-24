@@ -16,6 +16,18 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await login(email, password);
+      
+      // Auto-open customer display in new tab (only once per session)
+      const { user } = useAuthStore.getState();
+      if (user?.id) {
+        const hasOpenedDisplay = sessionStorage.getItem(`customer-display-opened-${user.id}`);
+        if (!hasOpenedDisplay) {
+          const customerDisplayUrl = `/customer-display?userId=${user.id}`;
+          window.open(customerDisplayUrl, '_blank');
+          sessionStorage.setItem(`customer-display-opened-${user.id}`, 'true');
+        }
+      }
+      
       router.push('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);

@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { employeesService, Employee } from '../../services/employees.service';
 import { Search, Eye, Users, Mail, Phone, Building2, Shield, Plus, ArrowLeft, Trash2 } from 'lucide-react';
 
-export default function EmployeesPage() {
+export default function EmployesPage() {
   const router = useRouter();
   const { isAuthenticated, _hasHydrated, user } = useAuthStore();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -118,7 +118,7 @@ export default function EmployeesPage() {
         {/* Employees Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEmployees.map((employee) => (
-            <EmployeeCard
+            <EmployeCard
               key={employee.id}
               employee={employee}
               isAdmin={isAdmin}
@@ -139,7 +139,7 @@ export default function EmployeesPage() {
   );
 }
 
-function EmployeeCard({
+function EmployeCard({
   employee,
   isAdmin,
   onView,

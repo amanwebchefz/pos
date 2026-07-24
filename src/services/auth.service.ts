@@ -21,7 +21,19 @@ export interface AuthResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
+    role: {
+      id: string;
+      name: string;
+      description: string;
+      permissions: Array<{
+        id: string;
+        name: string;
+        description: string;
+        resource: string;
+        action: string;
+      }>;
+    };
+    permissions?: string[];
   };
   accessToken: string;
   refreshToken: string;
@@ -29,26 +41,51 @@ export interface AuthResponse {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await axios.post('/auth/login', credentials);
-    return response.data;
+    try {
+      const response = await axios.post('/auth/login', credentials);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+      throw new Error(errorMessage);
+    }
   },
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await axios.post('/auth/register', data);
-    return response.data;
+    try {
+      const response = await axios.post('/auth/register', data);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+      throw new Error(errorMessage);
+    }
   },
 
   async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const response = await axios.post('/auth/refresh', { refreshToken });
-    return response.data;
+    try {
+      const response = await axios.post('/auth/refresh', { refreshToken });
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Token refresh failed';
+      throw new Error(errorMessage);
+    }
   },
 
   async logout(): Promise<void> {
-    await axios.post('/auth/logout');
+    try {
+      await axios.post('/auth/logout');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Logout failed';
+      throw new Error(errorMessage);
+    }
   },
 
   async me(): Promise<any> {
-    const response = await axios.get('/auth/me');
-    return response.data;
+    try {
+      const response = await axios.get('/auth/me');
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch user data';
+      throw new Error(errorMessage);
+    }
   },
 };

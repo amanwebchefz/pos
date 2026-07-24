@@ -58,13 +58,14 @@ export const useCartStore = create<CartState>()((set, get) => ({
         if (existingItemIndex >= 0) {
           const existingItem = items[existingItemIndex];
           const newQuantity = existingItem.quantity + item.quantity;
+          const newTax = item.tax * newQuantity;
           newItems = items.map((i, index) =>
             index === existingItemIndex
-              ? { ...i, quantity: newQuantity, total: i.unitPrice * newQuantity }
+              ? { ...i, quantity: newQuantity, total: i.unitPrice * newQuantity, tax: newTax }
               : i
           );
         } else {
-          newItems = [...items, { ...item, total: item.unitPrice * item.quantity }];
+          newItems = [...items, { ...item, total: item.unitPrice * item.quantity, tax: item.tax * item.quantity }];
         }
 
         set({ items: newItems });
@@ -111,7 +112,7 @@ export const useCartStore = create<CartState>()((set, get) => ({
         set({
           items: get().items.map((item) =>
             item.id === id
-              ? { ...item, quantity, total: item.unitPrice * quantity }
+              ? { ...item, quantity, total: item.unitPrice * quantity, tax: (item.tax / (item.quantity || 1)) * quantity }
               : item
           ),
         });
@@ -253,12 +254,12 @@ export const useCartStore = create<CartState>()((set, get) => ({
       calculateTotals: () => {
         const items = get().items;
         const discount = get().discount;
-        const tax = get().tax;
 
         const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+        const tax = items.reduce((sum, item) => sum + item.tax, 0);
         const total = subtotal - discount + tax;
 
-        set({ subtotal, total });
+        set({ subtotal, tax, total });
       },
     })
 );

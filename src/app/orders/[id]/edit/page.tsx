@@ -6,13 +6,22 @@ import { useAuthStore } from '@/store/authStore';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { ordersService, Order } from '@/services/orders.service';
 
-export default function OrderEditPage({ params }: { params: { id: string } }) {
+export default function OrderEditPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState('');
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    const resolveParams = async () => {
+      const p = await params;
+      setResolvedParams(p);
+    };
+    resolveParams();
+  }, [params]);
 
   useEffect(() => {
     if (!_hasHydrated) return; // Wait for Zustand persist to hydrate from localStorage
@@ -22,12 +31,16 @@ export default function OrderEditPage({ params }: { params: { id: string } }) {
       return;
     }
 
-    loadOrder();
-  }, [params.id, isAuthenticated, router, _hasHydrated]);
+    if (resolvedParams) {
+      loadOrder();
+    }
+  }, [resolvedParams, isAuthenticated, router, _hasHydrated]);
 
   const loadOrder = async () => {
+    if (!resolvedParams) return;
+    
     try {
-      const data = await ordersService.findOne(params.id);
+      const data = await ordersService.findOne(resolvedParams.id);
       setOrder(data);
       setStatus(data.status);
     } catch (error) {
@@ -38,13 +51,13 @@ export default function OrderEditPage({ params }: { params: { id: string } }) {
   };
 
   const handleSave = async () => {
-    if (!order) return;
+    if (!order || !resolvedParams) return;
     
     setIsSaving(true);
     try {
-      await ordersService.update(params.id, { status });
+      await ordersService.update(resolvedParams.id, { status });
       alert('Order updated successfully!');
-      router.push(`/orders/${params.id}`);
+      router.push(`/orders/${resolvedParams.id}`);
     } catch (error) {
       console.error('Failed to update order:', error);
       alert('Failed to update order. Please try again.');
@@ -54,7 +67,10 @@ export default function OrderEditPage({ params }: { params: { id: string } }) {
   };
 
   const handleCancel = () => {
-    router.push(`/orders/${params.id}`);
+    if (resolvedParams) {
+      router.push(`/orders`);
+      // router.push(`/orders/${resolvedParams.id}`);
+    }
   };
 
   if (isLoading) {
@@ -83,7 +99,7 @@ export default function OrderEditPage({ params }: { params: { id: string } }) {
             className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Order
+            {/* Back to Order */}
           </button>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Edit Order #{order.orderNumber}
