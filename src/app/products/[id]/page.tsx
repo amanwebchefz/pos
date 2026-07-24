@@ -164,7 +164,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </button>
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{product.name}</h1>
-            <div className="flex gap-3">
+            {/* <div className="flex gap-3">
               {hasPermission('products.update') && (
                 <button
                   onClick={() => router.push(`/products/${product.id}/edit`)}
@@ -184,7 +184,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   {isDeleting ? 'Deleting...' : 'Delete'}
                 </button>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
 

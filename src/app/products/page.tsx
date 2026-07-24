@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { productsService, Product } from '../../services/products.service';
 import { settingsService, BusinessSettings } from '../../services/settings.service';
-import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save, X, EyeIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 export default function ProductsPage() {
@@ -290,6 +290,14 @@ export default function ProductsPage() {
                         <td className="px-6 py-4 text-gray-300">{totalStock}</td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex justify-end gap-2">
+                            {hasPermission('products.view') && (
+                              <button
+                                onClick={() => router.push(`/products/${product.id}`)}
+                                className="p-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                              >
+                                <EyeIcon className="w-4 h-4" />
+                              </button>
+                            )}
                             {hasPermission('products.update') && (
                               <button
                                 onClick={() => handleEdit(product)}

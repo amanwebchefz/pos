@@ -334,6 +334,18 @@ export default function POSPage() {
                         <span className="text-sm text-gray-600 dark:text-gray-400">Stock: {totalStock}</span>
                       )}
                     </div>
+                    {product.barcode && (
+                      <div className="mt-2 flex flex-col items-center">
+                        <BarcodeComponent 
+                          value={product.barcode} 
+                          width={1} 
+                          height={30} 
+                          fontSize={10}
+                          displayValue={false}
+                        />
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{product.barcode}</p>
+                      </div>
+                    )}
                   </button>
                 );
               })
