@@ -19,6 +19,7 @@ import {
   Lock,
   Unlock,
   Settings,
+  RotateCcw,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -289,6 +290,13 @@ export default function DashboardPage() {
               icon={<ShoppingCart className="w-6 h-6" />}
               onClick={() => router.push('/orders')}
             />
+            {(isOwner || isManager) && (
+              <QuickActionButton
+                title="Refunds"
+                icon={<RotateCcw className="w-6 h-6" />}
+                onClick={() => router.push('/refunds')}
+              />
+            )}
           </div>
         </div>
 

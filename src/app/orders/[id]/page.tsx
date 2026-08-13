@@ -3,9 +3,10 @@
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { ArrowLeft, Package, DollarSign, Calendar, User, ShoppingBag, Printer, MapPin, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Package, DollarSign, Calendar, User, ShoppingBag, Printer, MapPin, Phone, Mail, RotateCcw } from 'lucide-react';
 import { ordersService, Order } from '@/services/orders.service';
 import { settingsService, BusinessSettings } from '@/services/settings.service';
+import RefundModal from '@/components/RefundModal';
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [businessSettings, setBusinessSettings] = useState<BusinessSettings | null>(null);
+  const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
   const { id } = use(params);
 
   useEffect(() => {
@@ -46,6 +48,14 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleRefundSuccess = () => {
+    loadOrder();
+  };
+
+  const canProcessRefund = () => {
+    return user?.role?.name === 'MANAGER' || user?.role?.name === 'ADMIN' || user?.role?.name === 'SUPER_ADMIN';
   };
 
   if (isLoading) {
@@ -115,13 +125,24 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 Order #{order.orderNumber}
               </h1>
             </div>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              <Printer className="w-5 h-5" />
-              Print Invoice
-            </button>
+            <div className="flex gap-3">
+              {canProcessRefund() && (
+                <button
+                  onClick={() => setIsRefundModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  Process Refund
+                </button>
+              )}
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <Printer className="w-5 h-5" />
+                Print Invoice
+              </button>
+            </div>
           </div>
 
           {/* Invoice */}
@@ -275,6 +296,14 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
       </div>
+
+      {/* Refund Modal */}
+      <RefundModal
+        orderId={parseInt(id)}
+        isOpen={isRefundModalOpen}
+        onClose={() => setIsRefundModalOpen(false)}
+        onSuccess={handleRefundSuccess}
+      />
     </>
   );
 }
