@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { Search, DollarSign, Percent, ArrowLeft, CheckCircle, AlertCircle, Package, ChevronRight, History, X } from 'lucide-react';
+import { Search, DollarSign, Percent, ArrowLeft, CheckCircle, AlertCircle, Package, ChevronRight, History, X, ArrowRight as ArrowRightIcon } from 'lucide-react';
 import { ordersService, Order } from '@/services/orders.service';
 import { refundsService, RefundableOrder, RefundableItem, CreateRefundDto } from '@/services/refunds.service';
 
@@ -54,6 +54,15 @@ export default function RefundsPage() {
       }
     }
   }, [isAuthenticated, router, _hasHydrated, user]);
+
+  const handleBack = () => {
+    const fromPos = new URLSearchParams(window.location.search).get('from');
+    if (fromPos === 'pos') {
+      router.push('/pos');
+    } else {
+      router.push('/dashboard');
+    }
+  };
 
   const handleSearchOrders = async (query: string) => {
     if (!query.trim()) {
@@ -324,42 +333,40 @@ export default function RefundsPage() {
 
   if (!_hasHydrated || !user || !user.role) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => router.push('/dashboard')}
-              className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              onClick={handleBack}
+              className="flex items-center text-slate-600 hover:text-slate-900 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Dashboard
+              Back
             </button>
             <button
               onClick={() => router.push('/refunds/history')}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
             >
               <History className="w-5 h-5" />
               View Refund History
             </button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Process Refund</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Search for an order and select items to refund
-          </p>
+          <h1 className="text-3xl font-bold text-slate-900">Process Refund</h1>
+          <p className="text-slate-600 mt-1">Search for an order and select items to refund</p>
         </div>
 
         {/* Success Message */}
         {success && (
-          <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex items-center gap-2 text-green-600 dark:text-green-400">
+          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-md flex items-center gap-2 text-emerald-700 shadow-sm">
             <CheckCircle className="w-5 h-5" />
             {success}
           </div>
@@ -367,7 +374,7 @@ export default function RefundsPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-center gap-2 text-red-600 dark:text-red-400">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-red-700 shadow-sm">
             <AlertCircle className="w-5 h-5" />
             {error}
           </div>
@@ -375,51 +382,36 @@ export default function RefundsPage() {
 
         {/* Order Search Section */}
         {!selectedOrder && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Search Order</h2>
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-slate-200">
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">Search Order</h2>
             <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Enter order number or ID..."
-                className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              {isSearching && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
             </div>
 
             {/* Search Results */}
             {orders.length > 0 && (
-              <div className="mt-6 space-y-3">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Search Results</h3>
+              <div className="mt-4 border border-slate-200 rounded-lg overflow-hidden max-h-64 overflow-y-auto">
                 {orders.map((order) => (
                   <div
                     key={order.id}
                     onClick={() => handleSelectOrder(order)}
-                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                    className="p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-200 last:border-b-0 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white">
-                          Order #{order.orderNumber}
-                        </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(order.orderDate).toLocaleDateString()} • {order.items?.length || 0} items
+                        <p className="font-medium text-slate-900">#{order.orderNumber}</p>
+                        <p className="text-sm text-slate-500">
+                          {new Date(order.orderDate).toLocaleDateString()} • ${Number(order.total).toFixed(2)}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900 dark:text-white">
-                          ${Number(order.total).toFixed(2)}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {order.status}
-                        </p>
-                      </div>
+                      <ArrowRightIcon className="w-5 h-5 text-slate-400" />
                     </div>
                   </div>
                 ))}
@@ -432,9 +424,9 @@ export default function RefundsPage() {
         {selectedOrder && refundableOrder && (
           <div className="space-y-6">
             {/* Order Summary */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-xl font-semibold text-slate-900">
                   Order #{selectedOrder.orderNumber}
                 </h2>
                 <button
@@ -443,27 +435,27 @@ export default function RefundsPage() {
                     setRefundableOrder(null);
                     setSelectedItems(new Map());
                   }}
-                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
                 >
                   Change Order
                 </button>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Paid</p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm text-slate-500">Total Paid</p>
+                  <p className="text-lg font-semibold text-slate-900">
                     ${refundableOrder.totalPaidAmount.toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Already Refunded</p>
-                  <p className="text-lg font-semibold text-red-600 dark:text-red-400">
+                  <p className="text-sm text-slate-500">Already Refunded</p>
+                  <p className="text-lg font-semibold text-red-600">
                     ${refundableOrder.totalRefundedAmount.toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Refundable Amount</p>
-                  <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+                  <p className="text-sm text-slate-500">Refundable Amount</p>
+                  <p className="text-lg font-semibold text-emerald-600">
                     ${refundableOrder.totalRefundableAmount.toFixed(2)}
                   </p>
                 </div>
@@ -472,22 +464,22 @@ export default function RefundsPage() {
 
             {/* Refundable Items */}
             {isLoadingRefundable ? (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
+                <div className="text-center py-8 text-slate-500">
                   Loading refundable items...
                 </div>
               </div>
             ) : (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Select Items to Refund</h2>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <h2 className="text-xl font-semibold text-slate-900">Select Items to Refund</h2>
+                  <span className="text-sm text-slate-500">
                     {selectedItemIds.size} selected
                   </span>
                 </div>
                 
                 {refundableOrder.items.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="text-center py-8 text-slate-500">
                     No refundable items available for this order
                   </div>
                 ) : (
@@ -497,8 +489,8 @@ export default function RefundsPage() {
                         key={item.id}
                         className={`border rounded-lg p-4 transition-colors ${
                           selectedItemIds.has(item.id)
-                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                            ? 'border-emerald-500 bg-emerald-50'
+                            : 'border-slate-200 hover:bg-slate-50'
                         }`}
                       >
                         <div className="flex items-start gap-4">
@@ -507,19 +499,19 @@ export default function RefundsPage() {
                             checked={selectedItemIds.has(item.id)}
                             onChange={() => handleItemCheckboxChange(item.id, item)}
                             disabled={item.refundableQuantity === 0}
-                            className="w-5 h-5 mt-1 text-green-600 rounded focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-5 h-5 mt-1 text-emerald-600 rounded focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                           <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 dark:text-white">{item.productName}</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <h4 className="font-medium text-slate-900">{item.productName}</h4>
+                            <p className="text-sm text-slate-500">
                               Original Qty: {item.quantity} • Refunded: {item.refundedQuantity} • Refundable: {item.refundableQuantity}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-slate-500">
                               Unit Price: ${Number(item.unitPrice).toFixed(2)} • Refundable: ${item.refundableAmount.toFixed(2)}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-bold text-gray-900 dark:text-white">
+                            <p className="text-lg font-bold text-slate-900">
                               ${item.refundableAmount.toFixed(2)}
                             </p>
                           </div>
@@ -535,7 +527,7 @@ export default function RefundsPage() {
                     <button
                       onClick={handleOpenRefundModal}
                       disabled={selectedItemIds.size === 0}
-                      className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                     >
                       <ChevronRight className="w-5 h-5" />
                       Process Refund ({selectedItemIds.size} items)
@@ -550,18 +542,18 @@ export default function RefundsPage() {
         {/* Refund Modal */}
         {isRefundModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between p-6 border-b border-slate-200">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Process Refund</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <h2 className="text-2xl font-bold text-slate-900">Process Refund</h2>
+                  <p className="text-sm text-slate-500 mt-1">
                     Order #{selectedOrder?.orderNumber} • {selectedItemIds.size} items selected
                   </p>
                 </div>
                 <button
                   onClick={handleCloseModal}
-                  className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                  className="text-slate-400 hover:text-slate-500 transition-colors"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -572,13 +564,13 @@ export default function RefundsPage() {
                 {refundableOrder?.items.filter(item => selectedItemIds.has(item.id)).map((item) => (
                   <div
                     key={item.id}
-                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4"
+                    className="border border-slate-200 rounded-lg p-4 mb-4"
                   >
                     <div className="flex items-start gap-4 mb-3">
-                      <Package className="w-6 h-6 text-gray-400 mt-1" />
+                      <Package className="w-6 h-6 text-slate-400 mt-1" />
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 dark:text-white">{item.productName}</h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <h4 className="font-medium text-slate-900">{item.productName}</h4>
+                        <p className="text-sm text-slate-500">
                           Refundable Qty: {item.refundableQuantity} • Refundable: ${item.refundableAmount.toFixed(2)}
                         </p>
                       </div>
@@ -593,9 +585,9 @@ export default function RefundsPage() {
                             name={`modal-refund-type-${item.id}`}
                             checked={selectedItems.get(item.id)?.refundType === 'amount'}
                             onChange={() => handleItemSelection(item.id, 'amount', selectedItems.get(item.id)?.value || 0, item)}
-                            className="w-4 h-4 text-blue-600"
+                            className="w-4 h-4 text-slate-600 focus:ring-slate-500"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Amount</span>
+                          <span className="text-sm text-slate-700">Amount</span>
                         </label>
                         <label className="flex items-center gap-2">
                           <input
@@ -603,9 +595,9 @@ export default function RefundsPage() {
                             name={`modal-refund-type-${item.id}`}
                             checked={selectedItems.get(item.id)?.refundType === 'percent'}
                             onChange={() => handleItemSelection(item.id, 'percent', selectedItems.get(item.id)?.value || 0, item)}
-                            className="w-4 h-4 text-blue-600"
+                            className="w-4 h-4 text-slate-600 focus:ring-slate-500"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Percentage</span>
+                          <span className="text-sm text-slate-700">Percentage</span>
                         </label>
                         <label className="flex items-center gap-2">
                           <input
@@ -613,16 +605,16 @@ export default function RefundsPage() {
                             name={`modal-refund-type-${item.id}`}
                             checked={selectedItems.get(item.id)?.refundType === 'full'}
                             onChange={() => handleItemSelection(item.id, 'full', item.refundableAmount, item)}
-                            className="w-4 h-4 text-blue-600"
+                            className="w-4 h-4 text-slate-600 focus:ring-slate-500"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Full Refund</span>
+                          <span className="text-sm text-slate-700">Full Refund</span>
                         </label>
                       </div>
 
                       {/* Value Input */}
                       {selectedItems.get(item.id)?.refundType === 'amount' && (
                         <div className="flex items-center gap-2 flex-1">
-                          <DollarSign className="w-5 h-5 text-gray-400" />
+                          <DollarSign className="w-5 h-5 text-slate-400" />
                           <input
                             type="number"
                             min="0"
@@ -631,14 +623,14 @@ export default function RefundsPage() {
                             value={selectedItems.get(item.id)?.value || ''}
                             onChange={(e) => handleItemSelection(item.id, 'amount', parseFloat(e.target.value) || 0, item)}
                             placeholder="Enter amount"
-                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="flex-1 px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                           />
-                          <span className="text-sm text-gray-500 dark:text-gray-400">/ ${item.refundableAmount.toFixed(2)}</span>
+                          <span className="text-sm text-slate-500">/ ${item.refundableAmount.toFixed(2)}</span>
                         </div>
                       )}
                       {selectedItems.get(item.id)?.refundType === 'percent' && (
                         <div className="flex items-center gap-2 flex-1">
-                          {/* <Percent className="w-5 h-5 text-gray-400" /> */}
+                          {/* <Percent className="w-5 h-5 text-slate-400" /> */}
                           <input
                             type="number"
                             min="0"
@@ -647,15 +639,15 @@ export default function RefundsPage() {
                             value={selectedItems.get(item.id)?.value || ''}
                             onChange={(e) => handleItemSelection(item.id, 'percent', parseFloat(e.target.value) || 0, item)}
                             placeholder="Enter percentage"
-                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="flex-1 px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                           />
-                          <span className="text-sm text-gray-500 dark:text-gray-400">%</span>
+                          <span className="text-sm text-slate-500">%</span>
                         </div>
                       )}
                       {selectedItems.get(item.id)?.refundType === 'full' && (
                         <div className="flex items-center gap-2 flex-1">
-                          <DollarSign className="w-5 h-5 text-green-500" />
-                          <span className="text-lg font-semibold text-green-600 dark:text-green-400">
+                          <DollarSign className="w-5 h-5 text-emerald-500" />
+                          <span className="text-lg font-semibold text-emerald-600">
                             ${item.refundableAmount.toFixed(2)} (Full Refund)
                           </span>
                         </div>
@@ -663,19 +655,19 @@ export default function RefundsPage() {
 
                       {/* Calculated Info */}
                       {selectedItems.has(item.id) && selectedItems.get(item.id)!.value > 0 && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                        <div className="text-sm text-slate-600 bg-slate-50 p-2 rounded">
                           {selectedItems.get(item.id)!.refundType === 'percent' && (
                             <p>
                               Refund Amount: ${calculateItemRefundAmount(item, selectedItems.get(item.id)!.refundType as 'amount' | 'percent' | 'full', selectedItems.get(item.id)!.value).toFixed(2)}
                             </p>
                           )}
                           {selectedItems.get(item.id)!.refundType === 'amount' && (
-                            <p className="text-xs text-gray-500 dark:text-gray-500">
+                            <p className="text-xs text-slate-500">
                               Refund Amount: {calculateRefundPercentage(item, selectedItems.get(item.id)!.value).toFixed(1)}%
                             </p>
                           )}
                           {selectedItems.get(item.id)!.refundType === 'full' && (
-                            <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                            <p className="text-xs text-emerald-600 font-medium">
                               Full Refund: ${item.refundableAmount.toFixed(2)}
                             </p>
                           )}
@@ -688,7 +680,7 @@ export default function RefundsPage() {
                         value={selectedItems.get(item.id)?.reason || ''}
                         onChange={(e) => handleItemReasonChange(item.id, e.target.value)}
                         placeholder="Item-specific reason (optional)"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                       />
                     </div>
                   </div>
@@ -696,14 +688,14 @@ export default function RefundsPage() {
 
                 {/* Global Reason */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Refund Reason <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={globalReason}
                     onChange={(e) => setGlobalReason(e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     placeholder="Enter the reason for this refund..."
                   />
                 </div>
@@ -711,7 +703,7 @@ export default function RefundsPage() {
 
                 {/* Error Message */}
                 {modalError && (
-                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-center gap-2 text-red-600 dark:text-red-400">
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-red-700 shadow-sm">
                     <AlertCircle className="w-5 h-5" />
                     {modalError}
                   </div>
@@ -719,15 +711,15 @@ export default function RefundsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+              <div className="border-t border-slate-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-green-500" />
-                    <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <DollarSign className="w-5 h-5 text-emerald-500" />
+                    <span className="text-lg font-semibold text-slate-900">
                       Total Refund Amount:
                     </span>
                   </div>
-                  <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <span className="text-2xl font-bold text-emerald-600">
                     ${calculateTotalRefund().toFixed(2)}
                   </span>
                 </div>
@@ -735,14 +727,14 @@ export default function RefundsPage() {
                   <button
                     onClick={handleCloseModal}
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                    className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || selectedItems.size === 0}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                   >
                     {isSubmitting ? (
                       <>

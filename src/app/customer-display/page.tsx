@@ -75,18 +75,18 @@ function CustomerDisplayContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
       <div className="w-full max-w-4xl">
         {/* Order Summary */}
-        <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
+        <div className="bg-white rounded-lg p-8 border border-slate-200 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <ShoppingCart className="w-8 h-8 text-orange-500" />
-            <h2 className="text-3xl font-bold text-white">Your Order</h2>
+            <ShoppingCart className="w-8 h-8 text-slate-600" />
+            <h2 className="text-3xl font-bold text-slate-900">Your Order</h2>
           </div>
 
           {items.length === 0 ? (
             <div className="text-center py-16">
-              <ShoppingCart className="w-24 h-24 mx-auto mb-4 text-gray-600" />
+              <ShoppingCart className="w-24 h-24 mx-auto mb-4 text-slate-300" />
             </div>
           ) : (
             <>
@@ -95,13 +95,13 @@ function CustomerDisplayContent() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-gray-700 rounded-lg p-4 flex justify-between items-center transition-all hover:bg-gray-600"
+                    className="bg-slate-50 rounded-lg p-4 flex justify-between items-center transition-all hover:bg-slate-100 border border-slate-200"
                   >
                     <div>
-                      <h3 className="text-xl font-semibold text-white">{item.productName}</h3>
-                      <p className="text-gray-400">Qty: {item.quantity} × ${Number(item.unitPrice).toFixed(2)}</p>
+                      <h3 className="text-xl font-semibold text-slate-900">{item.productName}</h3>
+                      <p className="text-slate-600">Qty: {item.quantity} × ${Number(item.unitPrice).toFixed(2)}</p>
                     </div>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-2xl font-bold text-slate-900">
                       ${Number(item.total).toFixed(2)}
                     </p>
                   </div>
@@ -109,24 +109,24 @@ function CustomerDisplayContent() {
               </div>
 
               {/* Totals */}
-              <div className="border-t border-gray-600 pt-6 space-y-3">
-                <div className="flex justify-between text-xl text-gray-400">
+              <div className="border-t border-slate-200 pt-6 space-y-3">
+                <div className="flex justify-between text-xl text-slate-600">
                   <span>Subtotal</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-xl text-green-400">
+                  <div className="flex justify-between text-xl text-emerald-600">
                     <span>Discount</span>
                     <span>-${discount.toFixed(2)}</span>
                   </div>
                 )}
                 {tax > 0 && (
-                  <div className="flex justify-between text-xl text-gray-400">
+                  <div className="flex justify-between text-xl text-slate-600">
                     <span>Tax</span>
                     <span>${tax.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-4xl font-bold text-white pt-4 border-t border-gray-600">
+                <div className="flex justify-between text-4xl font-bold text-slate-900 pt-4 border-t border-slate-200">
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
@@ -137,10 +137,10 @@ function CustomerDisplayContent() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <div className="flex items-center justify-center gap-2 text-gray-500">
+          <div className="flex items-center justify-center gap-2 text-slate-400">
             <Receipt className="w-5 h-5" />
           </div>
-          <p className="text-gray-600 text-sm mt-2">Real-time order display</p>
+          <p className="text-slate-500 text-sm mt-2">Real-time order display</p>
         </div>
       </div>
     </div>
@@ -149,8 +149,8 @@ function CustomerDisplayContent() {
 
 export default function CustomerDisplayPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
-      <div className="text-white text-xl">Loading...</div>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
+      <div className="text-slate-500 text-xl">Loading...</div>
     </div>}>
       <CustomerDisplayContent />
     </Suspense>

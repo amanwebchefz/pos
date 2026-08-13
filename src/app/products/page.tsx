@@ -117,35 +117,35 @@ export default function ProductsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
                 {/* Back to Dashboard */}
               </button>
-              <div className="border-l border-gray-700 pl-4">
-                <h1 className="text-2xl font-bold">Products</h1>
-                <p className="text-gray-400">Manage your product inventory</p>
+              <div className="border-l border-slate-200 pl-4">
+                <h1 className="text-2xl font-bold text-slate-900">Products</h1>
+                <p className="text-slate-600">Manage your product inventory</p>
               </div>
             </div>
             {hasPermission('products.create') && (
               <button
                 onClick={() => router.push('/products/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
               >
                 <Plus className="w-5 h-5" />
                 Add Product
@@ -160,34 +160,34 @@ export default function ProductsPage() {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
               placeholder="Search products by name, code, or SKU..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
             />
           </div>
         </div>
 
         {/* Products Table */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-700">
+            <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">SKU</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Product id</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Sell Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cost Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Tax</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">SKU</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Product id</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Sell Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cost Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tax</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Stock</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="divide-y divide-slate-200">
               {filteredProducts.map((product) => {
                 const totalStock = product.inventory && product.inventory.length > 0
                   ? product.inventory.reduce((sum: number, inv: any) => sum + inv.quantity, 0)
@@ -195,7 +195,7 @@ export default function ProductsPage() {
                 const isEditing = editingId === product.id;
 
                 return (
-                  <tr key={product.id} className="hover:bg-gray-750">
+                  <tr key={product.id} className="hover:bg-slate-50 transition-colors">
                     {isEditing ? (
                       <>
                         <td className="px-6 py-4">
@@ -203,7 +203,7 @@ export default function ProductsPage() {
                             type="text"
                             value={editForm.name}
                             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                           />
                         </td>
                         <td className="px-6 py-4">
@@ -211,7 +211,7 @@ export default function ProductsPage() {
                             type="text"
                             value={editForm.sku}
                             onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                           />
                         </td>
                         <td className="px-6 py-4">
@@ -219,16 +219,16 @@ export default function ProductsPage() {
                             type="text"
                             value={editForm.barcode}
                             onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                           />
                         </td>
-                        <td className="px-6 py-4 text-gray-300">{product.category?.name || '-'}</td>
+                        <td className="px-6 py-4 text-slate-500">{product.category?.name || '-'}</td>
                         <td className="px-6 py-4">
                           <input
                             type="number"
                             value={editForm.sellingPrice}
                             onChange={(e) => setEditForm({ ...editForm, sellingPrice: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                           />
                         </td>
                         <td className="px-6 py-4">
@@ -236,7 +236,7 @@ export default function ProductsPage() {
                             type="number"
                             value={editForm.costPrice}
                             onChange={(e) => setEditForm({ ...editForm, costPrice: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                           />
                         </td>
                         <td className="px-6 py-4">
@@ -244,7 +244,7 @@ export default function ProductsPage() {
                             type="number"
                             value={editForm.taxRate}
                             onChange={(e) => setEditForm({ ...editForm, taxRate: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                             placeholder="0"
                             min="0"
                             step="0.01"
@@ -255,20 +255,20 @@ export default function ProductsPage() {
                             type="number"
                             value={editForm.stock}
                             onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                           />
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => handleSave(product.id)}
-                              className="p-2 bg-green-600 hover:bg-green-700 rounded transition-colors"
+                              className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors"
                             >
                               <Save className="w-4 h-4" />
                             </button>
                             <button
                               onClick={handleCancel}
-                              className="p-2 bg-gray-600 hover:bg-gray-700 rounded transition-colors"
+                              className="p-2 bg-slate-600 hover:bg-slate-700 text-white rounded transition-colors"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -277,23 +277,23 @@ export default function ProductsPage() {
                       </>
                     ) : (
                       <>
-                        <td className="px-6 py-4 font-medium text-white">{product.name}</td>
-                        <td className="px-6 py-4 text-gray-300">{product.sku || '-'}</td>
-                        <td className="px-6 py-4 text-gray-300">{product.barcode || '-'}</td>
-                        <td className="px-6 py-4 text-gray-300">{product.category?.name || '-'}</td>
-                        <td className="px-6 py-4 text-green-400 font-semibold">${Number(product.sellingPrice).toFixed(2)}</td>
-                        <td className="px-6 py-4 text-gray-300">${Number(product.costPrice).toFixed(2)}</td>
-                        <td className="px-6 py-4 text-gray-300">
+                        <td className="px-6 py-4 font-medium text-slate-900">{product.name}</td>
+                        <td className="px-6 py-4 text-slate-600">{product.sku || '-'}</td>
+                        <td className="px-6 py-4 text-slate-600">{product.barcode || '-'}</td>
+                        <td className="px-6 py-4 text-slate-600">{product.category?.name || '-'}</td>
+                        <td className="px-6 py-4 text-emerald-600 font-semibold">${Number(product.sellingPrice).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-slate-600">${Number(product.costPrice).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-slate-600">
                           {/* {businessSettings?.taxType} */}
                            {product.taxRate}%
                         </td>
-                        <td className="px-6 py-4 text-gray-300">{totalStock}</td>
+                        <td className="px-6 py-4 text-slate-600">{totalStock}</td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex justify-end gap-2">
                             {hasPermission('products.view') && (
                               <button
                                 onClick={() => router.push(`/products/${product.id}`)}
-                                className="p-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors"
                               >
                                 <EyeIcon className="w-4 h-4" />
                               </button>
@@ -301,7 +301,7 @@ export default function ProductsPage() {
                             {hasPermission('products.update') && (
                               <button
                                 onClick={() => handleEdit(product)}
-                                className="p-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
@@ -309,7 +309,7 @@ export default function ProductsPage() {
                             {hasPermission('products.delete') && (
                               <button
                                 onClick={() => handleDelete(product.id)}
-                                className="p-2 bg-red-600 hover:bg-red-700 rounded transition-colors"
+                                className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -326,8 +326,8 @@ export default function ProductsPage() {
 
           {filteredProducts.length === 0 && (
             <div className="text-center py-16">
-              <Package className="w-24 h-24 mx-auto mb-4 text-gray-600" />
-              <p className="text-xl text-gray-400">No products found</p>
+              <Package className="w-24 h-24 mx-auto mb-4 text-slate-300" />
+              <p className="text-xl text-slate-500">No products found</p>
             </div>
           )}
         </div>

@@ -61,35 +61,35 @@ export default function EmployesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
                 {/* Back to Dashboard */}
               </button>
-              <div className="border-l border-gray-700 pl-4">
-                <h1 className="text-2xl font-bold">Employees</h1>
-                <p className="text-gray-400">Manage your team members</p>
+              <div className="border-l border-slate-200 pl-4">
+                <h1 className="text-2xl font-bold text-slate-900">Employees</h1>
+                <p className="text-slate-600">Manage your team members</p>
               </div>
             </div>
             {isAdmin && (
               <button
-                onClick={() => router.push('/customers/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+                onClick={() => router.push('/employees/new')}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
               >
                 <Plus className="w-5 h-5" />
                 Add Employee
@@ -104,13 +104,13 @@ export default function EmployesPage() {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
               placeholder="Search employees by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
             />
           </div>
         </div>
@@ -130,8 +130,8 @@ export default function EmployesPage() {
 
         {filteredEmployees.length === 0 && (
           <div className="text-center py-16">
-            <Users className="w-24 h-24 mx-auto mb-4 text-gray-600" />
-            <p className="text-xl text-gray-400">No employees found</p>
+            <Users className="w-24 h-24 mx-auto mb-4 text-slate-300" />
+            <p className="text-xl text-slate-500">No employees found</p>
           </div>
         )}
       </main>
@@ -151,7 +151,7 @@ function EmployeCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4 mb-4">
         {employee.avatar ? (
           <img
@@ -160,18 +160,18 @@ function EmployeCard({
             className="w-16 h-16 rounded-full object-cover"
           />
         ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
-            <Users className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center">
+            <Users className="w-8 h-8 text-slate-500" />
           </div>
         )}
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-lg font-semibold text-slate-900">
             {employee.firstName} {employee.lastName}
           </h3>
           <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
             employee.isActive 
-              ? 'bg-green-500/20 text-green-500' 
-              : 'bg-red-500/20 text-red-500'
+              ? 'bg-emerald-100 text-emerald-800' 
+              : 'bg-red-100 text-red-800'
           }`}>
             {employee.isActive ? 'Active' : 'Inactive'}
           </span>
@@ -179,17 +179,17 @@ function EmployeCard({
       </div>
 
       <div className="space-y-2 mb-4">
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <Shield className="w-4 h-4" />
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <Shield className="w-4 h-4 text-slate-400" />
           {employee.role.name}
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <Mail className="w-4 h-4" />
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <Mail className="w-4 h-4 text-slate-400" />
           {employee.email}
         </div>
         {employee.phoneNumber && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <Phone className="w-4 h-4" />
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <Phone className="w-4 h-4 text-slate-400" />
             {employee.phoneNumber}
           </div>
         )}
@@ -198,7 +198,7 @@ function EmployeCard({
       <div className="flex gap-2">
         <button
           onClick={onView}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
         >
           <Eye className="w-4 h-4" />
           View Details
@@ -206,7 +206,7 @@ function EmployeCard({
         {isAdmin && (
           <button
             onClick={onDelete}
-            className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+            className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
           >
             <Trash2 className="w-4 h-4" />
           </button>

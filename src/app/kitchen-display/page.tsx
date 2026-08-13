@@ -45,15 +45,15 @@ export default function KitchenDisplayPage() {
   const getStatusColor = (status: KitchenOrder['status']) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-500';
+        return 'bg-amber-500';
       case 'preparing':
-        return 'bg-blue-500';
+        return 'bg-blue-600';
       case 'ready':
-        return 'bg-green-500';
+        return 'bg-emerald-600';
       case 'served':
-        return 'bg-gray-500';
+        return 'bg-slate-500';
       default:
-        return 'bg-gray-500';
+        return 'bg-slate-500';
     }
   };
 
@@ -73,15 +73,15 @@ export default function KitchenDisplayPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="min-h-screen bg-slate-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <ChefHat className="w-10 h-10 text-orange-500" />
-            <h1 className="text-4xl font-bold">Kitchen Display</h1>
+            <ChefHat className="w-10 h-10 text-slate-600" />
+            <h1 className="text-4xl font-bold text-slate-900">Kitchen Display</h1>
           </div>
-          <div className="text-2xl text-gray-400">
+          <div className="text-2xl text-slate-500">
             {new Date().toLocaleTimeString()}
           </div>
         </div>
@@ -91,28 +91,28 @@ export default function KitchenDisplayPage() {
           {orders.map((order) => (
             <div
               key={order.id}
-              className="bg-gray-800 rounded-xl p-6 shadow-lg border-2 border-gray-700 hover:border-gray-600 transition-colors"
+              className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow"
             >
               {/* Order Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`${getStatusColor(order.status)} p-2 rounded-full`}>
+                  <div className={`${getStatusColor(order.status)} p-2 rounded-full text-white`}>
                     {getStatusIcon(order.status)}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold">{order.orderNumber}</h3>
-                    <p className="text-sm text-gray-400">{order.timeAgo}</p>
+                    <h3 className="text-2xl font-bold text-slate-900">{order.orderNumber}</h3>
+                    <p className="text-sm text-slate-500">{order.timeAgo}</p>
                   </div>
                 </div>
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${
                     order.status === 'pending'
-                      ? 'bg-yellow-500/20 text-yellow-500'
+                      ? 'bg-amber-100 text-amber-800'
                       : order.status === 'preparing'
-                      ? 'bg-blue-500/20 text-blue-500'
+                      ? 'bg-blue-100 text-blue-800'
                       : order.status === 'ready'
-                      ? 'bg-green-500/20 text-green-500'
-                      : 'bg-gray-500/20 text-gray-500'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-slate-100 text-slate-800'
                   }`}
                 >
                   {order.status}
@@ -124,7 +124,7 @@ export default function KitchenDisplayPage() {
                 {order.items.map((item, index) => (
                   <div
                     key={index}
-                    className="bg-gray-700/50 rounded-lg p-3 text-lg"
+                    className="bg-slate-50 rounded-lg p-3 text-lg text-slate-900 border border-slate-200"
                   >
                     {item}
                   </div>
@@ -136,7 +136,7 @@ export default function KitchenDisplayPage() {
                 {order.status === 'pending' && (
                   <button
                     onClick={() => updateOrderStatus(order.id, 'preparing')}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors shadow-sm"
                   >
                     Start Preparing
                   </button>
@@ -144,7 +144,7 @@ export default function KitchenDisplayPage() {
                 {order.status === 'preparing' && (
                   <button
                     onClick={() => updateOrderStatus(order.id, 'ready')}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold transition-colors shadow-sm"
                   >
                     Mark Ready
                   </button>
@@ -152,7 +152,7 @@ export default function KitchenDisplayPage() {
                 {order.status === 'ready' && (
                   <button
                     onClick={() => updateOrderStatus(order.id, 'served')}
-                    className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                    className="flex-1 bg-slate-600 hover:bg-slate-700 text-white py-3 rounded-lg font-semibold transition-colors shadow-sm"
                   >
                     Mark Served
                   </button>
@@ -165,8 +165,8 @@ export default function KitchenDisplayPage() {
         {/* Empty State */}
         {orders.length === 0 && (
           <div className="text-center py-16">
-            <ChefHat className="w-24 h-24 mx-auto mb-4 text-gray-600" />
-            <p className="text-2xl text-gray-400">No pending orders</p>
+            <ChefHat className="w-24 h-24 mx-auto mb-4 text-slate-300" />
+            <p className="text-2xl text-slate-500">No pending orders</p>
           </div>
         )}
       </div>

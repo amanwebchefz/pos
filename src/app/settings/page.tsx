@@ -172,27 +172,27 @@ export default function ProfileSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold">Profile Settings</h1>
-              <p className="text-gray-400">Manage your personal information</p>
+              <h1 className="text-2xl font-bold text-slate-900">Profile Settings</h1>
+              <p className="text-slate-600">Manage your personal information</p>
             </div>
           </div>
         </div>
@@ -202,9 +202,9 @@ export default function ProfileSettingsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl">
           {/* Profile Information */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-              <User className="w-5 h-5" />
+          <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-900">
+              <User className="w-5 h-5 text-slate-600" />
               Personal Information
             </h2>
             
@@ -231,50 +231,50 @@ export default function ProfileSettingsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">First Name</label>
                   <input
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
                   <input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
                     type="email"
                     value={formData.email}
                     disabled
-                    className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-400 focus:outline-none cursor-not-allowed"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-500 focus:outline-none cursor-not-allowed"
                   />
                 </div>
-                <p className="text-sm text-gray-400 mt-1">Email cannot be changed</p>
+                <p className="text-sm text-slate-500 mt-1">Email cannot be changed</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
                     type="tel"
                     value={formData.phoneNumber}
                     onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     placeholder="+1 234 567 8900"
                   />
                 </div>
@@ -284,7 +284,7 @@ export default function ProfileSettingsPage() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-lg font-semibold transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed shadow-sm"
                 >
                   <Save className="w-5 h-5" />
                   {isSaving ? 'Saving...' : 'Save Changes'}
@@ -294,16 +294,16 @@ export default function ProfileSettingsPage() {
           </div>
 
           {/* Password Change */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mt-6">
+          <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm mt-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Lock className="w-5 h-5" />
+              <h2 className="text-xl font-semibold flex items-center gap-2 text-slate-900">
+                <Lock className="w-5 h-5 text-slate-600" />
                 Change Password
               </h2>
               <button
                 type="button"
                 onClick={() => setShowPasswordForm(!showPasswordForm)}
-                className="text-orange-500 hover:text-orange-400 transition-colors"
+                className="text-slate-600 hover:text-slate-900 transition-colors"
               >
                 {showPasswordForm ? 'Cancel' : 'Change Password'}
               </button>
@@ -312,35 +312,35 @@ export default function ProfileSettingsPage() {
             {showPasswordForm && (
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
                   <input
                     type="password"
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">New Password</label>
                   <input
                     type="password"
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     required
                     minLength={6}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
                   <input
                     type="password"
                     value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     required
                     minLength={6}
                   />
@@ -350,7 +350,7 @@ export default function ProfileSettingsPage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-lg font-semibold transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed shadow-sm"
                   >
                     <Save className="w-5 h-5" />
                     {isSaving ? 'Updating...' : 'Update Password'}
@@ -362,104 +362,104 @@ export default function ProfileSettingsPage() {
 
           {/* Business Information - Admin Only */}
           {isAdmin && (
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mt-6">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                <Building2 className="w-5 h-5" />
+            <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm mt-6">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-900">
+                <Building2 className="w-5 h-5 text-slate-600" />
                 Business Information
               </h2>
               
               <form onSubmit={handleBusinessSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Business Name</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Business Name</label>
                   <input
                     type="text"
                     value={businessData.name}
                     onChange={(e) => setBusinessData({ ...businessData, name: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Business Email</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Business Email</label>
                     <input
                       type="email"
                       value={businessData.email}
                       onChange={(e) => setBusinessData({ ...businessData, email: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Business Phone</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Business Phone</label>
                     <input
                       type="tel"
                       value={businessData.phone}
                       onChange={(e) => setBusinessData({ ...businessData, phone: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Address</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Address</label>
                   <input
                     type="text"
                     value={businessData.address}
                     onChange={(e) => setBusinessData({ ...businessData, address: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">City</label>
                     <input
                       type="text"
                       value={businessData.city}
                       onChange={(e) => setBusinessData({ ...businessData, city: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">State</label>
                     <input
                       type="text"
                       value={businessData.state}
                       onChange={(e) => setBusinessData({ ...businessData, state: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Country</label>
                     <input
                       type="text"
                       value={businessData.country}
                       onChange={(e) => setBusinessData({ ...businessData, country: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Zip Code</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Zip Code</label>
                     <input
                       type="text"
                       value={businessData.zipCode}
                       onChange={(e) => setBusinessData({ ...businessData, zipCode: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Tax Type</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Tax Type</label>
                     <select
                       value={businessData.taxType}
                       onChange={(e) => setBusinessData({ ...businessData, taxType: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     >
                       <option value="GST">GST (Goods and Services Tax)</option>
                       <option value="VAT">VAT (Value Added Tax)</option>
@@ -469,11 +469,11 @@ export default function ProfileSettingsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Currency</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Currency</label>
                     <select
                       value={businessData.currency}
                       onChange={(e) => setBusinessData({ ...businessData, currency: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                     >
                       <option value="USD">USD ($)</option>
                       <option value="EUR">EUR (€)</option>
@@ -489,7 +489,7 @@ export default function ProfileSettingsPage() {
                   <button
                     type="submit"
                     disabled={isSavingBusiness}
-                    className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-lg font-semibold transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed shadow-sm"
                   >
                     <Save className="w-5 h-5" />
                     {isSavingBusiness ? 'Saving...' : 'Save Business Settings'}

@@ -95,8 +95,13 @@ export default function DashboardPage() {
     }
   };
 
+  const handleOpenRegister = () => {
+    setShowOpenModal(true);
+  };
+
   const handleOpenRegisterSuccess = () => {
     loadActiveRegister();
+    router.push('/pos');
   };
 
   const handleCloseRegisterSuccess = () => {
@@ -105,33 +110,33 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Dashboard</h1>
-              <p className="text-gray-400">Welcome back, {user?.firstName}</p>
+              <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+              <p className="text-slate-600">Welcome back, {user?.firstName}</p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
               >
                 <LogOut className="w-5 h-5" />
                 Logout
               </button>
               <button
                 onClick={() => router.push('/settings')}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
               >
                 <Settings className="w-5 h-5" />
                 Settings
@@ -147,47 +152,47 @@ export default function DashboardPage() {
         {!isRegisterLoading && (
           <div className="mb-8">
             {activeRegister ? (
-              <div className="bg-gradient-to-r from-green-900 to-green-800 rounded-xl p-6 border border-green-700">
+              <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="bg-green-500 p-3 rounded-lg">
+                    <div className="bg-emerald-500 p-3 rounded-lg">
                       <Unlock className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Cash Register Open</h3>
-                      <p className="text-green-200 text-sm">
+                      <h3 className="text-lg font-bold text-slate-900">Cash Register Open</h3>
+                      <p className="text-emerald-700 text-sm">
                         Register: {activeRegister.registerNumber} | Opened: {new Date(activeRegister.openedAt).toLocaleString()}
                       </p>
-                      <p className="text-green-200 text-sm mt-1">
+                      <p className="text-emerald-700 text-sm mt-1">
                         Opening Amount: ${Number(activeRegister.openingAmount).toFixed(2)}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowCloseModal(true)}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors font-medium"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium shadow-sm"
                   >
                     Close Register
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="bg-gradient-to-r from-orange-900 to-orange-800 rounded-xl p-6 border border-orange-700">
+              <div className="bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl p-6 border border-amber-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="bg-orange-500 p-3 rounded-lg">
+                    <div className="bg-amber-500 p-3 rounded-lg">
                       <Lock className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Cash Register Closed</h3>
-                      <p className="text-orange-200 text-sm">
+                      <h3 className="text-lg font-bold text-slate-900">Cash Register Closed</h3>
+                      <p className="text-amber-700 text-sm">
                         Open your register to start taking orders
                       </p>
                     </div>
                   </div>
                   <button
-                    onClick={() => setShowOpenModal(true)}
-                    className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg transition-colors font-medium"
+                    onClick={handleOpenRegister}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors font-medium shadow-sm"
                   >
                     Open Register
                   </button>
@@ -263,7 +268,7 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <QuickActionButton
               title="New Order"
@@ -303,7 +308,7 @@ export default function DashboardPage() {
         {/* Admin Actions */}
         {isOwner && (
           <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">Admin Actions</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-4">Admin Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <QuickActionButton
                 title="Register History"
@@ -343,11 +348,11 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-sm">{title}</p>
-          <p className="text-3xl font-bold mt-2">${value.toLocaleString()}</p>
+          <p className="text-slate-500 text-sm">{title}</p>
+          <p className="text-3xl font-bold mt-2 text-slate-900">${value.toLocaleString()}</p>
         </div>
         <div className={`${color} p-3 rounded-lg`}>{icon}</div>
       </div>
@@ -367,11 +372,11 @@ function AlertCard({
   color: string;
 }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-sm">{title}</p>
-          <p className="text-3xl font-bold mt-2">{count}</p>
+          <p className="text-slate-500 text-sm">{title}</p>
+          <p className="text-3xl font-bold mt-2 text-slate-900">{count}</p>
         </div>
         <div className={`${color} p-3 rounded-lg`}>{icon}</div>
       </div>
@@ -391,10 +396,10 @@ function QuickActionButton({
   return (
     <button
       onClick={onClick}
-      className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-6 flex flex-col items-center gap-3 transition-colors"
+      className="bg-white hover:bg-slate-50 border border-slate-200 rounded-xl p-6 flex flex-col items-center gap-3 transition-colors shadow-sm"
     >
-      <div className="text-orange-500">{icon}</div>
-      <span className="font-medium">{title}</span>
+      <div className="text-slate-700">{icon}</div>
+      <span className="font-medium text-slate-900">{title}</span>
     </button>
   );
 }
