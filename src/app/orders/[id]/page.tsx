@@ -18,7 +18,8 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const { id } = use(params);
 
   useEffect(() => {
-    if (!_hasHydrated) return; // Wait for Zustand persist to hydrate from localStorage
+    // Load order when hydration is complete
+    if (!_hasHydrated) return;
 
     if (!isAuthenticated) {
       router.push('/login');
@@ -28,9 +29,22 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     loadOrder();
   }, [id, isAuthenticated, router, _hasHydrated]);
 
+  // Force load after 1 second if hydration is stuck
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('Forcing order load due to timeout');
+        loadOrder();
+      }
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
+
   const loadOrder = async () => {
     try {
+      console.log('Loading order with ID:', id);
       const data = await ordersService.findOne(id);
+      console.log('Order loaded successfully:', data);
       setOrder(data);
       // Load business settings to get tax type
       try {

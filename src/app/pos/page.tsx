@@ -11,6 +11,7 @@ import { productsService, Product } from '@/services/products.service';
 import { cashRegisterService, CashRegister } from '@/services/cash-register.service';
 import BarcodeComponent from 'react-barcode';
 import { toast } from 'react-toastify';
+import OrderDetailModal from '@/components/OrderDetailModal';
 
 export default function POSPage() {
   const router = useRouter();
@@ -27,6 +28,8 @@ export default function POSPage() {
   const [closingCash, setClosingCash] = useState('');
   const [isClosingRegister, setIsClosingRegister] = useState(false);
   const [activeRegister, setActiveRegister] = useState<CashRegister | null>(null);
+  const [isOrderDetailModalOpen, setIsOrderDetailModalOpen] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState<any>(null);
 
   useEffect(() => {
     if (!_hasHydrated) return; // Wait for Zustand persist to hydrate from localStorage
@@ -294,10 +297,12 @@ export default function POSPage() {
       const orderId = response.data?.data?.id;
       if (orderId) {
         clearCartAndStorage();
-        router.push(`/orders/${orderId}`);
+        setCreatedOrder(response.data?.data);
+        setIsOrderDetailModalOpen(true);
+        toast.success('Order created successfully!');
       } else {
         console.error('Order ID not found in response', response.data);
-        alert('Order created but could not redirect to order details. Please check your orders list.');
+        alert('Order created but could not show order details. Please check your orders list.');
         clearCartAndStorage();
         router.push('/orders');
       }
@@ -329,7 +334,7 @@ export default function POSPage() {
                   className="flex items-center gap-2 px-3 py-2 lg:px-4 lg:py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm text-sm lg:text-base"
                 >
                   <Menu className="w-4 h-4 lg:w-5 lg:h-5" />
-                  <span className="hidden sm:inline">Menu</span>
+                  {/* <span className="hidden sm:inline">Menu</span> */}
                 </button>
                 {isMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200 z-50">
@@ -589,7 +594,7 @@ export default function POSPage() {
                     required
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Expected Total</label>
                   <input
                     type="text"
@@ -597,7 +602,7 @@ export default function POSPage() {
                     disabled
                     className="w-full px-4 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-500 cursor-not-allowed"
                   />
-                </div>
+                </div> */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Notes</label>
                   <textarea
@@ -632,6 +637,18 @@ export default function POSPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Order Detail Modal */}
+      {isOrderDetailModalOpen && (
+        <OrderDetailModal
+          isOpen={isOrderDetailModalOpen}
+          onClose={() => {
+            setIsOrderDetailModalOpen(false);
+            setCreatedOrder(null);
+          }}
+          order={createdOrder}
+        />
       )}
     </div>
   );

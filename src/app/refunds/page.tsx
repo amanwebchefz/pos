@@ -203,7 +203,7 @@ export default function RefundsPage() {
         }
       } else {
         if (value > refundableItem.refundableAmount) {
-          setModalError(`Amount cannot exceed refundable amount of $${refundableItem.refundableAmount.toFixed(2)}`);
+          setModalError(`Amount cannot exceed refundable amount of $${Number(refundableItem.refundableAmount).toFixed(2)}`);
           return;
         }
       }
@@ -507,12 +507,12 @@ export default function RefundsPage() {
                               Original Qty: {item.quantity} • Refunded: {item.refundedQuantity} • Refundable: {item.refundableQuantity}
                             </p>
                             <p className="text-sm text-slate-500">
-                              Unit Price: ${Number(item.unitPrice).toFixed(2)} • Refundable: ${item.refundableAmount.toFixed(2)}
+                              Unit Price: ${Number(item.unitPrice).toFixed(2)} • Refundable: ${Number(item.refundableAmount).toFixed(2)}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-slate-900">
-                              ${item.refundableAmount.toFixed(2)}
+                              ${Number(item.refundableAmount).toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -571,7 +571,7 @@ export default function RefundsPage() {
                       <div className="flex-1">
                         <h4 className="font-medium text-slate-900">{item.productName}</h4>
                         <p className="text-sm text-slate-500">
-                          Refundable Qty: {item.refundableQuantity} • Refundable: ${item.refundableAmount.toFixed(2)}
+                          Refundable Qty: {item.refundableQuantity} • Refundable: ${Number(item.refundableAmount).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -625,7 +625,7 @@ export default function RefundsPage() {
                             placeholder="Enter amount"
                             className="flex-1 px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-900 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
                           />
-                          <span className="text-sm text-slate-500">/ ${item.refundableAmount.toFixed(2)}</span>
+                          <span className="text-sm text-slate-500">/ ${Number(item.refundableAmount).toFixed(2)}</span>
                         </div>
                       )}
                       {selectedItems.get(item.id)?.refundType === 'percent' && (
@@ -648,7 +648,7 @@ export default function RefundsPage() {
                         <div className="flex items-center gap-2 flex-1">
                           <DollarSign className="w-5 h-5 text-emerald-500" />
                           <span className="text-lg font-semibold text-emerald-600">
-                            ${item.refundableAmount.toFixed(2)} (Full Refund)
+                            ${Number(item.refundableAmount).toFixed(2)} (Full Refund)
                           </span>
                         </div>
                       )}
@@ -668,7 +668,7 @@ export default function RefundsPage() {
                           )}
                           {selectedItems.get(item.id)!.refundType === 'full' && (
                             <p className="text-xs text-emerald-600 font-medium">
-                              Full Refund: ${item.refundableAmount.toFixed(2)}
+                              Full Refund: ${Number(item.refundableAmount).toFixed(2)}
                             </p>
                           )}
                         </div>

@@ -58,6 +58,7 @@ export interface OrderItem {
   tax: number;
   total: number;
   notes?: string;
+  refundStatus?: 'refunded' | null;
 }
 
 export interface Payment {

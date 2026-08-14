@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '../../../../store/authStore';
-import { employeesService, Employee, CreateEmployeeDto, Role } from '../../../../services/employees.service';
+import { useAuthStore } from '../../../store/authStore';
+import { employeesService, CreateEmployeeDto, Role } from '../../../services/employees.service';
 import { ArrowLeft, User, Mail, Phone, Shield, Lock } from 'lucide-react';
 
-export default function EditEmployeePage() {
+export default function AddEmployeePage() {
   const router = useRouter();
   const { isAuthenticated, user, _hasHydrated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
-  const [employee, setEmployee] = useState<Employee | null>(null);
   const [formData, setFormData] = useState<CreateEmployeeDto>({
     email: '',
     password: '',
@@ -37,31 +35,8 @@ export default function EditEmployeePage() {
       return;
     }
 
-    const id = window.location.pathname.split('/').slice(-2)[0];
-    if (id) {
-      loadEmployee(id);
-      loadRoles();
-    }
+    loadRoles();
   }, [isAuthenticated, router, _hasHydrated, isAdmin]);
-
-  const loadEmployee = async (id: string) => {
-    try {
-      const data = await employeesService.findOne(id);
-      setEmployee(data);
-      setFormData({
-        email: data.email,
-        password: '',
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phoneNumber: data.phoneNumber || '',
-        roleId: data.roleId || '',
-      });
-    } catch (error) {
-      console.error('Failed to load employee:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const loadRoles = async () => {
     try {
@@ -74,29 +49,20 @@ export default function EditEmployeePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
+    setIsLoading(true);
 
     try {
-      const id = window.location.pathname.split('/').slice(-2)[0];
-      const updateData: any = { ...formData };
-      if (!updateData.password) {
-        delete updateData.password;
-      }
-      await employeesService.update(id, updateData);
+      await employeesService.create(formData);
       router.push('/customers');
     } catch (error) {
-      console.error('Failed to update employee:', error);
-      alert('Failed to update employee. Please try again.');
+      console.error('Failed to create employee:', error);
+      alert('Failed to create employee. Please try again.');
     } finally {
-      setIsSaving(false);
+      setIsLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    // setFormData({
-    //   ...formData,
-    //   [e.target.name]: e.target.value,
-    // });
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -105,7 +71,7 @@ export default function EditEmployeePage() {
     }));
   };
 
-  if (isLoading) {
+  if (!_hasHydrated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-gray-900">Loading...</div>
@@ -126,8 +92,8 @@ export default function EditEmployeePage() {
               <ArrowLeft className="w-6 h-6" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold">Edit Employee</h1>
-              <p className="text-gray-600">Update employee information</p>
+              <h1 className="text-2xl font-bold">Add New Employee</h1>
+              <p className="text-gray-600">Create a new team member account</p>
             </div>
           </div>
         </div>
@@ -191,7 +157,7 @@ export default function EditEmployeePage() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Password (Leave blank to keep current)</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
@@ -199,9 +165,10 @@ export default function EditEmployeePage() {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    required
                     minLength={6}
                     className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    placeholder="Enter new password (min 6 characters)"
+                    placeholder="Enter password (min 6 characters)"
                   />
                 </div>
               </div>
@@ -259,10 +226,10 @@ export default function EditEmployeePage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSaving}
+                  disabled={isLoading}
                   className="flex-1 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSaving ? 'Updating...' : 'Update Employee'}
+                  {isLoading ? 'Creating...' : 'Create Employee'}
                 </button>
               </div>
             </div>

@@ -12,6 +12,8 @@ export interface OpenRegisterData {
 export interface CloseRegisterData {
   closingAmount: number;
   notes?: string;
+  totalSales?: number;
+  transactionCount?: number;
 }
 
 export interface CashRegister {
@@ -35,6 +37,10 @@ export interface CashRegister {
   openedAt: string;
   closedAt: string | null;
   notes: string | null;
+  openingNotes?: string | null;
+  closingNotes?: string | null;
+  totalSales?: number | null;
+  transactionCount?: number | null;
   createdAt: string;
   updatedAt: string;
 }

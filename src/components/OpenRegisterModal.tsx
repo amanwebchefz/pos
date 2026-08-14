@@ -82,7 +82,7 @@ export default function OpenRegisterModal({ isOpen, onClose, onSuccess }: OpenRe
             </div>
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Register Number (Optional)
             </label>
@@ -93,7 +93,7 @@ export default function OpenRegisterModal({ isOpen, onClose, onSuccess }: OpenRe
               placeholder="REG-001"
               className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
             />
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">

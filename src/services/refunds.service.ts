@@ -58,6 +58,7 @@ export interface RefundableItem {
   refundedQuantity: number;
   refundableQuantity: number;
   refundableAmount: number;
+  refundStatus?: 'refunded' | null;
 }
 
 export interface RefundableOrder {

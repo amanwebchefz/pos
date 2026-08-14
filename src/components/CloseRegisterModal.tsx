@@ -22,6 +22,8 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
   const [isCalculating, setIsCalculating] = useState(false);
   const [totalSales, setTotalSales] = useState(0);
   const [expectedAmount, setExpectedAmount] = useState(0);
+  const [transactionCount, setTransactionCount] = useState(0);
+  const [duration, setDuration] = useState('');
 
   // Calculate total sales when modal opens
   useEffect(() => {
@@ -33,25 +35,43 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
         const openedDate = new Date(register.openedAt);
         const now = new Date();
 
+        // Validate dates and calculate duration safely
+        if (isNaN(openedDate.getTime()) || isNaN(now.getTime())) {
+          setDuration('0h 0m');
+        } else {
+          const durationMs = now.getTime() - openedDate.getTime();
+          const hours = Math.max(0, Math.floor(durationMs / (1000 * 60 * 60)));
+          const minutes = Math.max(0, Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)));
+          setDuration(`${hours}h ${minutes}m`);
+        }
+
         // Get all orders for this user from when register was opened
         const allOrders = await ordersService.findAll();
         const userOrders = allOrders.filter((order: Order) => {
-          const orderDate = new Date(order.createdAt);
+          const orderDate = new Date(order.orderDate);
+          
+          // Validate order date
+          if (isNaN(orderDate.getTime())) return false;
+          
           return (
             order.userId === user.id &&
+            order.status === 'completed' &&
             orderDate >= openedDate &&
             orderDate <= now
           );
         });
 
-        // Calculate total sales
-        const sales = userOrders.reduce((sum, order) => sum + order.total, 0);
+        // Calculate total sales and transaction count with validation
+        const sales = userOrders.reduce((sum, order) => {
+          const orderTotal = Number(order.total) || 0;
+          return sum + orderTotal;
+        }, 0);
         setTotalSales(sales);
+        setTransactionCount(userOrders.length);
 
         // Expected amount = opening amount + total sales
-        // Handle opening amount as number (it should be a number from API)
         const openingAmount = Number(register.openingAmount) || 0;
-        const expected = Number(openingAmount) + Number(sales);
+        const expected = openingAmount + sales;
         setExpectedAmount(expected);
 
         // Auto-fill closing amount with expected amount
@@ -62,6 +82,8 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
         const fallbackAmount = Number(register.openingAmount) || 0;
         setExpectedAmount(fallbackAmount);
         setClosingAmount(fallbackAmount.toString());
+        setTransactionCount(0);
+        setDuration('0h 0m');
       } finally {
         setIsCalculating(false);
       }
@@ -83,6 +105,8 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
       const data: CloseRegisterData = {
         closingAmount: parseFloat(closingAmount),
         notes: notes || undefined,
+        totalSales: totalSales,
+        transactionCount: transactionCount,
       };
 
       await cashRegisterService.closeRegister(register.id, data);
@@ -91,6 +115,10 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
       onClose();
       setClosingAmount('');
       setNotes('');
+      setTotalSales(0);
+      setExpectedAmount(0);
+      setTransactionCount(0);
+      setDuration('');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to close cash register');
     } finally {
@@ -99,6 +127,9 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
   };
 
   const formatCurrency = (amount: number) => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -109,36 +140,46 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-xl p-6 w-full max-w-lg border border-gray-700">
+      <div className="bg-white rounded-xl p-6 w-full max-w-lg border border-gray-200">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Close Cash Register</h2>
+          <h2 className="text-xl font-bold text-gray-900">Close Cash Register</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Register Summary */}
-        <div className="bg-gray-700 rounded-lg p-4 mb-6 space-y-3">
+        <div className="bg-gray-50 rounded-lg p-4 mb-6 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">Register Number</span>
-            <span className="text-white font-medium">{register.registerNumber}</span>
+            <span className="text-gray-600">Register Number</span>
+            <span className="text-gray-900 font-medium">{register.registerNumber}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">Opened At</span>
-            <span className="text-white font-medium">
+            <span className="text-gray-600">Opened At</span>
+            <span className="text-gray-900 font-medium">
               {new Date(register.openedAt).toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">Opening Amount</span>
-            <span className="text-white font-medium">{formatCurrency(Number(register.openingAmount))}</span>
+            <span className="text-gray-600">Duration</span>
+            <span className="text-gray-900 font-medium">
+              {isCalculating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                duration
+              )}
+            </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">Total Sales</span>
-            <span className="text-white font-medium">
+            <span className="text-gray-600">Opening Amount</span>
+            <span className="text-gray-900 font-medium">{formatCurrency(Number(register.openingAmount))}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Total Sales</span>
+            <span className="text-gray-900 font-medium">
               {isCalculating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
@@ -146,9 +187,19 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
               )}
             </span>
           </div>
-          <div className="flex justify-between items-center border-t border-gray-600 pt-3">
-            <span className="text-gray-300 font-medium">Expected Amount</span>
-            <span className="text-white font-bold">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Transactions</span>
+            <span className="text-gray-900 font-medium">
+              {isCalculating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                transactionCount
+              )}
+            </span>
+          </div>
+          <div className="flex justify-between items-center border-t border-gray-300 pt-3">
+            <span className="text-gray-700 font-medium">Expected Amount</span>
+            <span className="text-gray-900 font-bold">
               {isCalculating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
@@ -160,7 +211,7 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Closing Amount ($)
             </label>
             <div className="relative">
@@ -172,7 +223,7 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
                 value={closingAmount}
                 onChange={(e) => setClosingAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 required
               />
             </div>
@@ -180,15 +231,21 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
 
           {/* Difference Calculation */}
           {closingAmount && !isCalculating && (
-            <div className="bg-gray-700 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Expected Amount</span>
-                <span className="text-white font-medium">
+                <span className="text-gray-600">Total Sales</span>
+                <span className="text-gray-900 font-medium">
+                  {formatCurrency(totalSales)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Expected Amount</span>
+                <span className="text-gray-900 font-medium">
                   {formatCurrency(expectedAmount)}
                 </span>
               </div>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-gray-400">Difference</span>
+              <div className="flex justify-between items-center border-t border-gray-300 pt-3">
+                <span className="text-gray-700 font-medium">Difference</span>
                 <div className="flex items-center gap-2">
                   {parseFloat(closingAmount) >= expectedAmount ? (
                     <TrendingUp className="w-4 h-4 text-green-500" />
@@ -210,7 +267,7 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Notes (Optional)
             </label>
             <textarea
@@ -218,7 +275,7 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
               onChange={(e) => setNotes(e.target.value)}
               placeholder="End of shift notes..."
               rows={3}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
             />
           </div>
 
@@ -226,7 +283,7 @@ export default function CloseRegisterModal({ isOpen, onClose, onSuccess, registe
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+              className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
             >
               Cancel
             </button>

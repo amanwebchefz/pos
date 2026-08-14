@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   Lock,
   Unlock,
+  X,
 } from 'lucide-react';
 
 export default function RegisterHistoryPage() {
@@ -22,6 +23,8 @@ export default function RegisterHistoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [selectedRegister, setSelectedRegister] = useState<CashRegister | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   // Helper function to get role name safely (role can be string or object)
   const getRoleName = (role: string | any): string => {
@@ -71,6 +74,16 @@ export default function RegisterHistoryPage() {
     loadRegisters();
   };
 
+  const handleRowClick = (register: CashRegister) => {
+    setSelectedRegister(register);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedRegister(null);
+  };
+
   const formatCurrency = (amount: number | null) => {
     if (amount === null) return '$0.00';
     return new Intl.NumberFormat('en-US', {
@@ -85,28 +98,28 @@ export default function RegisterHistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-900">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
                 <h1 className="text-2xl font-bold">Register History</h1>
-                <p className="text-gray-400">View all cash register records</p>
+                <p className="text-gray-600">View all cash register records</p>
               </div>
             </div>
           </div>
@@ -116,32 +129,32 @@ export default function RegisterHistoryPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="bg-gray-800 rounded-xl p-6 mb-6 border border-gray-700">
+        <div className="bg-white rounded-xl p-6 mb-6 border border-gray-200 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Filter className="w-5 h-5 text-orange-500" />
             <h2 className="text-lg font-semibold">Filter by Date</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Start Date
               </label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 End Date
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <div className="flex items-end gap-2">
@@ -153,7 +166,7 @@ export default function RegisterHistoryPage() {
               </button>
               <button
                 onClick={handleReset}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
               >
                 Reset
               </button>
@@ -192,75 +205,79 @@ export default function RegisterHistoryPage() {
         {/* Register List */}
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="text-white">Loading...</div>
+            <div className="text-gray-900">Loading...</div>
           </div>
         ) : registers.length === 0 ? (
-          <div className="bg-gray-800 rounded-xl p-8 border border-gray-700 text-center">
-            <p className="text-gray-400">No register records found</p>
+          <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm text-center">
+            <p className="text-gray-500">No register records found</p>
           </div>
         ) : (
-          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-700">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Register
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Opening Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Closing Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Difference
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Opened At
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Closed At
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-200">
                   {registers.map((register) => (
-                    <tr key={register.id} className="hover:bg-gray-750">
+                    <tr
+                      key={register.id}
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => handleRowClick(register)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-white">{register.registerNumber}</div>
+                        <div className="text-sm font-medium text-gray-900">{register.registerNumber}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-white">
+                        <div className="text-sm text-gray-900">
                           {register.user.firstName} {register.user.lastName}
                         </div>
-                        <div className="text-xs text-gray-400">{register.user.email}</div>
+                        <div className="text-xs text-gray-500">{register.user.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {register.status === 'open' ? (
                             <>
                               <Unlock className="w-4 h-4 text-green-500" />
-                              <span className="text-sm text-green-500">Open</span>
+                              <span className="text-sm text-green-600">Open</span>
                             </>
                           ) : (
                             <>
                               <Lock className="w-4 h-4 text-orange-500" />
-                              <span className="text-sm text-orange-500">Closed</span>
+                              <span className="text-sm text-orange-600">Closed</span>
                             </>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatCurrency(register.openingAmount)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatCurrency(register.closingAmount)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -268,28 +285,158 @@ export default function RegisterHistoryPage() {
                           {register.difference && register.difference > 0 ? (
                             <>
                               <TrendingUp className="w-4 h-4 text-green-500" />
-                              <span className="text-sm text-green-500">{formatCurrency(register.difference)}</span>
+                              <span className="text-sm text-green-600">{formatCurrency(register.difference)}</span>
                             </>
                           ) : register.difference && register.difference < 0 ? (
                             <>
                               <TrendingDown className="w-4 h-4 text-red-500" />
-                              <span className="text-sm text-red-500">{formatCurrency(register.difference)}</span>
+                              <span className="text-sm text-red-600">{formatCurrency(register.difference)}</span>
                             </>
                           ) : (
-                            <span className="text-sm text-gray-400">0</span>
+                            <span className="text-sm text-gray-500">0</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {formatDate(register.openedAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {register.closedAt ? formatDate(register.closedAt) : '-'}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Register Detail Modal */}
+        {showModal && selectedRegister && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl border border-gray-200 shadow-lg max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Register Details</h2>
+                <button
+                  onClick={handleCloseModal}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6 text-gray-400" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Register Info */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Register Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Register Number</p>
+                      <p className="font-medium text-gray-900">{selectedRegister.registerNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Status</p>
+                      <div className="flex items-center gap-2">
+                        {selectedRegister.status === 'open' ? (
+                          <>
+                            <Unlock className="w-4 h-4 text-green-500" />
+                            <span className="font-medium text-green-600">Open</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-4 h-4 text-orange-500" />
+                            <span className="font-medium text-orange-600">Closed</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">User</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedRegister.user.firstName} {selectedRegister.user.lastName}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">User Email</p>
+                      <p className="font-medium text-gray-900">{selectedRegister.user.email}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Financial Info */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Financial Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Opening Amount</p>
+                      <p className="font-medium text-gray-900">{formatCurrency(selectedRegister.openingAmount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Closing Amount</p>
+                      <p className="font-medium text-gray-900">{formatCurrency(selectedRegister.closingAmount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Difference</p>
+                      <div className="flex items-center gap-2">
+                        {selectedRegister.difference && selectedRegister.difference > 0 ? (
+                          <>
+                            <TrendingUp className="w-4 h-4 text-green-500" />
+                            <span className="font-medium text-green-600">{formatCurrency(selectedRegister.difference)}</span>
+                          </>
+                        ) : selectedRegister.difference && selectedRegister.difference < 0 ? (
+                          <>
+                            <TrendingDown className="w-4 h-4 text-red-500" />
+                            <span className="font-medium text-red-600">{formatCurrency(selectedRegister.difference)}</span>
+                          </>
+                        ) : (
+                          <span className="font-medium text-gray-600">0</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Total Sales</p>
+                      <p className="font-medium text-gray-900">{formatCurrency(selectedRegister.totalSales || 0)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Transaction Count</p>
+                      <p className="font-medium text-gray-900">{selectedRegister.transactionCount || 0}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Opening Notes */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Opening Notes</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {selectedRegister.openingNotes || selectedRegister.notes || 'No opening notes provided'}
+                  </p>
+                </div>
+
+                {/* Closing Notes */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Closing Notes</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {selectedRegister.closingNotes || 'No closing notes provided'}
+                  </p>
+                </div>
+
+                {/* Timestamps */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Timestamps</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Opened At</p>
+                      <p className="font-medium text-gray-900">{formatDate(selectedRegister.openedAt)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Closed At</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedRegister.closedAt ? formatDate(selectedRegister.closedAt) : 'Not closed yet'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -310,11 +457,11 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-sm">{title}</p>
-          <p className="text-2xl font-bold mt-2">
+          <p className="text-gray-600 text-sm">{title}</p>
+          <p className="text-2xl font-bold mt-2 text-gray-900">
             {title.includes('Amount') || title.includes('Difference')
               ? `$${value.toLocaleString()}`
               : value}

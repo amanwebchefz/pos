@@ -61,35 +61,35 @@ export default function EmployeesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-900">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
                 {/* Back to Dashboard */}
               </button>
-              <div className="border-l border-gray-700 pl-4">
+              <div className="border-l border-gray-200 pl-4">
                 <h1 className="text-2xl font-bold">Employees</h1>
-                <p className="text-gray-400">Manage your team members</p>
+                <p className="text-gray-600">Manage your team members</p>
               </div>
             </div>
             {isAdmin && (
               <button
                 onClick={() => router.push('/customers/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 Add Employee
@@ -110,7 +110,7 @@ export default function EmployeesPage() {
               placeholder="Search employees by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -130,8 +130,8 @@ export default function EmployeesPage() {
 
         {filteredEmployees.length === 0 && (
           <div className="text-center py-16">
-            <Users className="w-24 h-24 mx-auto mb-4 text-gray-600" />
-            <p className="text-xl text-gray-400">No employees found</p>
+            <Users className="w-24 h-24 mx-auto mb-4 text-gray-400" />
+            <p className="text-xl text-gray-500">No employees found</p>
           </div>
         )}
       </main>
@@ -151,7 +151,7 @@ function EmployeeCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+    <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:border-gray-300 transition-colors">
       <div className="flex items-start gap-4 mb-4">
         {employee.avatar ? (
           <img
@@ -160,7 +160,7 @@ function EmployeeCard({
             className="w-16 h-16 rounded-full object-cover"
           />
         ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
             <Users className="w-8 h-8 text-gray-400" />
           </div>
         )}
@@ -169,9 +169,9 @@ function EmployeeCard({
             {employee.firstName} {employee.lastName}
           </h3>
           <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
-            employee.isActive 
-              ? 'bg-green-500/20 text-green-500' 
-              : 'bg-red-500/20 text-red-500'
+            employee.isActive
+              ? 'bg-green-100 text-green-700'
+              : 'bg-red-100 text-red-700'
           }`}>
             {employee.isActive ? 'Active' : 'Inactive'}
           </span>
@@ -179,16 +179,16 @@ function EmployeeCard({
       </div>
 
       <div className="space-y-2 mb-4">
-        <div className="flex items-center gap-2 text-sm text-gray-400">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
           <Shield className="w-4 h-4" />
           {employee.role.name}
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-400">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
           <Mail className="w-4 h-4" />
           {employee.email}
         </div>
         {employee.phoneNumber && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
             <Phone className="w-4 h-4" />
             {employee.phoneNumber}
           </div>
@@ -198,7 +198,7 @@ function EmployeeCard({
       <div className="flex gap-2">
         <button
           onClick={onView}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
         >
           <Eye className="w-4 h-4" />
           View Details
@@ -206,7 +206,7 @@ function EmployeeCard({
         {isAdmin && (
           <button
             onClick={onDelete}
-            className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+            className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
           >
             <Trash2 className="w-4 h-4" />
           </button>
