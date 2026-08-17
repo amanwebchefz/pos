@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { socketService } from '@/services/socket.service';
 
+// Helper function to generate order number
+const generateOrderNumber = (): string => {
+  const timestamp = Date.now().toString().slice(-4);
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `${timestamp}${random}`;
+};
+
 export interface CartItem {
   id: string;
   productId: string;
@@ -25,6 +32,9 @@ interface CartState {
   subtotal: number;
   total: number;
   userId: string | null;
+  isPaid: boolean;
+  orderCreated: boolean;
+  orderNumber: string | null;
   addItem: (item: Omit<CartItem, 'total'>) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -36,6 +46,8 @@ interface CartState {
   calculateTotals: () => void;
   setCartFromSocket: (cartData: any) => void;
   setUserId: (userId: string) => void;
+  setPaymentStatus: (isPaid: boolean) => void;
+  setOrderCreated: (orderCreated: boolean, orderNumber?: string) => void;
 }
 
 export const useCartStore = create<CartState>()((set, get) => ({
@@ -47,6 +59,9 @@ export const useCartStore = create<CartState>()((set, get) => ({
   subtotal: 0,
   total: 0,
   userId: null,
+  isPaid: false,
+  orderCreated: false,
+  orderNumber: null,
 
       addItem: (item) => {
         const items = get().items;
@@ -81,7 +96,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: currentState.discount,
           tax: currentState.tax,
           subtotal: currentState.subtotal,
-          total: currentState.total
+          total: currentState.total,
+          isPaid: currentState.isPaid,
+          orderCreated: currentState.orderCreated,
+          orderNumber: currentState.orderNumber
         });
       },
 
@@ -99,7 +117,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: currentState.discount,
           tax: currentState.tax,
           subtotal: currentState.subtotal,
-          total: currentState.total
+          total: currentState.total,
+          isPaid: currentState.isPaid,
+          orderCreated: currentState.orderCreated,
+          orderNumber: currentState.orderNumber
         });
       },
 
@@ -128,7 +149,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: currentState.discount,
           tax: currentState.tax,
           subtotal: currentState.subtotal,
-          total: currentState.total
+          total: currentState.total,
+          isPaid: currentState.isPaid,
+          orderCreated: currentState.orderCreated,
+          orderNumber: currentState.orderNumber
         });
       },
 
@@ -141,6 +165,9 @@ export const useCartStore = create<CartState>()((set, get) => ({
           tax: 0,
           subtotal: 0,
           total: 0,
+          isPaid: false,
+          orderCreated: false,
+          orderNumber: null,
         });
         
         // Broadcast cart update via Socket.io with userId
@@ -153,7 +180,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: 0,
           tax: 0,
           subtotal: 0,
-          total: 0
+          total: 0,
+          isPaid: false,
+          orderCreated: false,
+          orderNumber: null
         });
       },
 
@@ -166,6 +196,9 @@ export const useCartStore = create<CartState>()((set, get) => ({
           tax: 0,
           subtotal: 0,
           total: 0,
+          isPaid: false,
+          orderCreated: false,
+          orderNumber: null,
         });
         
         // Broadcast cart update via Socket.io with userId
@@ -178,7 +211,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: 0,
           tax: 0,
           subtotal: 0,
-          total: 0
+          total: 0,
+          isPaid: false,
+          orderCreated: false,
+          orderNumber: null
         });
       },
 
@@ -191,11 +227,55 @@ export const useCartStore = create<CartState>()((set, get) => ({
           tax: cartData.tax || 0,
           subtotal: cartData.subtotal || 0,
           total: cartData.total || 0,
+          isPaid: cartData.isPaid || false,
+          orderCreated: cartData.orderCreated || false,
+          orderNumber: cartData.orderNumber || null,
         });
       },
 
       setUserId: (userId: string) => {
         set({ userId });
+      },
+
+      setPaymentStatus: (isPaid: boolean) => {
+        set({ isPaid });
+        
+        // Broadcast payment status via Socket.io
+        const currentState = get();
+        socketService.emitCartUpdate({
+          userId: currentState.userId,
+          items: currentState.items,
+          customerId: currentState.customerId,
+          customerName: currentState.customerName,
+          discount: currentState.discount,
+          tax: currentState.tax,
+          subtotal: currentState.subtotal,
+          total: currentState.total,
+          isPaid: isPaid,
+          orderCreated: currentState.orderCreated,
+          orderNumber: currentState.orderNumber
+        });
+      },
+
+      setOrderCreated: (orderCreated: boolean, orderNumber?: string) => {
+        const generatedOrderNumber = orderNumber || generateOrderNumber();
+        set({ orderCreated, orderNumber: generatedOrderNumber });
+        
+        // Broadcast order creation via Socket.io
+        const currentState = get();
+        socketService.emitCartUpdate({
+          userId: currentState.userId,
+          items: currentState.items,
+          customerId: currentState.customerId,
+          customerName: currentState.customerName,
+          discount: currentState.discount,
+          tax: currentState.tax,
+          subtotal: currentState.subtotal,
+          total: currentState.total,
+          isPaid: currentState.isPaid,
+          orderCreated: orderCreated,
+          orderNumber: generatedOrderNumber
+        });
       },
 
       setCustomer: (customerId, customerName) => {
@@ -211,7 +291,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: currentState.discount,
           tax: currentState.tax,
           subtotal: currentState.subtotal,
-          total: currentState.total
+          total: currentState.total,
+          isPaid: currentState.isPaid,
+          orderCreated: currentState.orderCreated,
+          orderNumber: currentState.orderNumber
         });
       },
 
@@ -229,7 +312,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: currentState.discount,
           tax: currentState.tax,
           subtotal: currentState.subtotal,
-          total: currentState.total
+          total: currentState.total,
+          isPaid: currentState.isPaid,
+          orderCreated: currentState.orderCreated,
+          orderNumber: currentState.orderNumber
         });
       },
 
@@ -247,7 +333,10 @@ export const useCartStore = create<CartState>()((set, get) => ({
           discount: currentState.discount,
           tax: currentState.tax,
           subtotal: currentState.subtotal,
-          total: currentState.total
+          total: currentState.total,
+          isPaid: currentState.isPaid,
+          orderCreated: currentState.orderCreated,
+          orderNumber: currentState.orderNumber
         });
       },
 

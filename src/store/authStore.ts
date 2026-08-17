@@ -68,7 +68,8 @@ export const useAuthStore = create<AuthState>()(
       error: null,
       _hasHydrated: false,
       allPermissions: [],
-      setAuth: (user, accessToken, refreshToken) =>
+      setAuth: (user, accessToken, refreshToken) => {
+        localStorage.setItem('token', accessToken);
         set({
           user,
           accessToken,
@@ -76,14 +77,61 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           isLoading: false,
           error: null,
-        }),
+        });
+      },
       logout: async () => {
         try {
-          // Clear customer display session storage flag
-          const { user } = get();
+          // Close customer display window for this user
+          const { user, accessToken } = get();
           if (user?.id) {
+            console.log('Logout: Attempting to close customer display for user:', user.id);
+            
+            // Method 1: Try to close window directly if we opened it via JavaScript
+            const windowRef = localStorage.getItem(`customer-display-window-${user.id}`);
+            if (windowRef) {
+              console.log('Logout: Found window reference, attempting direct close');
+              // Note: We can't directly close cross-origin windows, but we can try the localStorage approach
+            }
+            
+            // Method 2: Send message to customer display window to close itself via localStorage
+            const closeSignal = Date.now().toString();
+            localStorage.setItem(`close-customer-display-${user.id}`, closeSignal);
+            console.log('Logout: Sent close signal via localStorage:', closeSignal);
+            
+            // Method 3: Call backend API to force close the window via .bat file
+            try {
+              console.log('Logout: Calling backend API to close display');
+              const closeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customer-display/close`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({
+                  userId: user.id,
+                }),
+              });
+              console.log('Logout: Backend close response status:', closeResponse.status);
+              const responseData = await closeResponse.json();
+              console.log('Logout: Backend close response data:', responseData);
+            } catch (apiError) {
+              console.error('Logout: Failed to close customer display via API:', apiError);
+            }
+            
+            // Clear customer display session storage flag
             sessionStorage.removeItem(`customer-display-opened-${user.id}`);
+            localStorage.removeItem(`customer-display-window-${user.id}`);
+            console.log('Logout: Cleared session storage and window reference flags');
+            
+            // Clean up the close message after a longer delay to ensure the customer display receives it
+            setTimeout(() => {
+              localStorage.removeItem(`close-customer-display-${user.id}`);
+              console.log('Logout: Cleaned up close signal');
+            }, 3000);
           }
+          
+          // Clear token from localStorage
+          localStorage.removeItem('token');
           
           await authService.logout();
         } catch (error) {
@@ -113,6 +161,8 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             isLoading: false,
           });
+          // Store token in localStorage for API calls
+          localStorage.setItem('token', response.accessToken);
           // Load all permissions from backend
           await get().loadPermissions();
         } catch (error: any) {
@@ -134,6 +184,8 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             isLoading: false,
           });
+          // Store token in localStorage for API calls
+          localStorage.setItem('token', response.accessToken);
           // Load all permissions from backend
           await get().loadPermissions();
         } catch (error: any) {

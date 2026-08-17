@@ -17,14 +17,56 @@ export default function LoginPage() {
     try {
       await login(email, password);
       
-      // Auto-open customer display in new tab (only once per session)
-      const { user } = useAuthStore.getState();
+      // Auto-open customer display in full screen on second monitor (only once per session per user)
+      const { user, accessToken } = useAuthStore.getState();
       if (user?.id) {
-        const hasOpenedDisplay = sessionStorage.getItem(`customer-display-opened-${user.id}`);
+         const storageKey = `customer-display-opened-${user.id}`;
+        const hasOpenedDisplay = sessionStorage.getItem(storageKey);
+        
+        // Always try to open fresh customer display for each login session
+        // This ensures new cashiers get their own display
         if (!hasOpenedDisplay) {
-          const customerDisplayUrl = `/customer-display?userId=${user.id}`;
-          window.open(customerDisplayUrl, '_blank');
-          sessionStorage.setItem(`customer-display-opened-${user.id}`, 'true');
+          try {
+            // Use backend API to execute bat file for true full screen (kiosk mode)
+            // This provides better full screen than JavaScript window.open
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/customer-display/open`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({
+                  userId: user.id,
+                }),
+              },
+            );
+            
+            // Store reference that we opened via backend
+            localStorage.setItem(`customer-display-window-${user.id}`, 'backend');
+            sessionStorage.setItem(storageKey, 'true');
+            console.log('Customer display opened in full screen kiosk mode via backend for user:', user.id);
+          } catch (error) {
+            console.error('Failed to open customer display via backend, trying JavaScript fallback:', error);
+            
+            // Fallback: Direct JavaScript window.open (not true full screen, but better than nothing)
+            try {
+              const customerDisplayUrl = `${window.location.origin}/customer-display?userId=${user.id}`;
+              const windowFeatures = 'width=1920,height=1080,left=1920,top=0,resizable=yes,scrollbars=yes';
+              const newWindow = window.open(customerDisplayUrl, `customer-display-${user.id}`, windowFeatures);
+              
+              if (newWindow) {
+                localStorage.setItem(`customer-display-window-${user.id}`, 'javascript');
+                sessionStorage.setItem(storageKey, 'true');
+                console.log('Customer display opened via JavaScript fallback for user:', user.id);
+              }
+            } catch (fallbackError) {
+              console.error('JavaScript fallback also failed:', fallbackError);
+            }
+          }
+        } else {
+          console.log('Customer display already opened for this session for user:', user.id);
         }
       }
       
@@ -89,16 +131,16 @@ export default function LoginPage() {
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center">
+              {/* <label className="flex items-center">
                 <input
                   type="checkbox"
                   className="w-4 h-4 rounded border-slate-300 bg-white text-slate-600 focus:ring-slate-400 focus:ring-offset-white"
                 />
                 <span className="ml-2 text-sm text-slate-600">Remember me</span>
-              </label>
-              <Link href="/forgot-password" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
+              </label> */}
+              {/* <Link href="/forgot-password" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
                 Forgot password?
-              </Link>
+              </Link> */}
             </div>
 
             {/* Submit Button */}
@@ -112,7 +154,7 @@ export default function LoginPage() {
           </form>
 
           {/* Divider */}
-          <div className="mt-6">
+          {/* <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200"></div>
@@ -121,10 +163,10 @@ export default function LoginPage() {
                 <span className="px-2 bg-white text-slate-500">Or continue with</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Social Login Buttons */}
-          <div className="mt-6 grid grid-cols-2 gap-4">
+          {/* <div className="mt-6 grid grid-cols-2 gap-4">
             <button className="flex items-center justify-center px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -140,16 +182,16 @@ export default function LoginPage() {
               </svg>
               GitHub
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Sign Up Link */}
-        <p className="mt-8 text-center text-slate-600">
+        {/* <p className="mt-8 text-center text-slate-600">
           Don't have an account?{' '}
           <Link href="/register" className="text-slate-700 hover:text-slate-900 font-medium transition-colors">
             Sign up
           </Link>
-        </p>
+        </p> */}
       </div>
     </div>
   );

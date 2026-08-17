@@ -246,6 +246,10 @@ export default function RefundsPage() {
     }
   };
 
+  const formatCurrency = (amount: number) => {
+    return `${Number(amount).toFixed(2)}`;
+  };
+
   const calculateRefundPercentage = (item: RefundableItem, amount: number): number => {
     return (amount / item.refundableAmount) * 100;
   };
@@ -646,9 +650,9 @@ export default function RefundsPage() {
                       )}
                       {selectedItems.get(item.id)?.refundType === 'full' && (
                         <div className="flex items-center gap-2 flex-1">
-                          <DollarSign className="w-5 h-5 text-emerald-500" />
+                          {/* <DollarSign className="w-5 h-5 text-emerald-500" /> */}
                           <span className="text-lg font-semibold text-emerald-600">
-                            ${Number(item.refundableAmount).toFixed(2)} (Full Refund)
+                            ${formatCurrency(item.refundableAmount)}
                           </span>
                         </div>
                       )}
@@ -720,7 +724,7 @@ export default function RefundsPage() {
                     </span>
                   </div>
                   <span className="text-2xl font-bold text-emerald-600">
-                    ${calculateTotalRefund().toFixed(2)}
+                    ${formatCurrency(calculateTotalRefund())}
                   </span>
                 </div>
                 <div className="flex gap-3">
