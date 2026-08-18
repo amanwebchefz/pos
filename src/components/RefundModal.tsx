@@ -50,7 +50,7 @@ export default function RefundModal({ orderId, isOpen, onClose, onSuccess }: Ref
       selectedItems.forEach((_, itemId) => {
         const item = refundableOrder?.items.find(i => i.id === itemId);
         if (item) {
-          total += item.refundableAmount;
+          total += Number(item.refundableAmount);
         }
       });
       if (amount > total) {
@@ -117,7 +117,7 @@ export default function RefundModal({ orderId, isOpen, onClose, onSuccess }: Ref
     selectedItems.forEach((_, itemId) => {
       const item = refundableOrder?.items.find(i => i.id === itemId);
       if (item) {
-        total += item.refundableAmount;
+        total += Number(item.refundableAmount);
       }
     });
 
@@ -319,7 +319,7 @@ export default function RefundModal({ orderId, isOpen, onClose, onSuccess }: Ref
                             {item.refundStatus !== 'refunded' ? (
                               <>
                                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                  ${item.refundableAmount > 0 ? item.refundableAmount.toFixed(2) : '0.00'}
+                                  ${item.refundableAmount > 0 ? Number(item.refundableAmount).toFixed(2) : '0.00'}
                                 </p>
                                 {selectedItems.has(item.id) && (
                                   <CheckCircle className="w-5 h-5 text-green-500 mt-1" />
@@ -415,7 +415,7 @@ export default function RefundModal({ orderId, isOpen, onClose, onSuccess }: Ref
                           selectedItems.forEach((_, itemId) => {
                             const item = refundableOrder?.items.find(i => i.id === itemId);
                             if (item) {
-                              maxAmount += item.refundableAmount;
+                              maxAmount += Number(item.refundableAmount);
                             }
                           });
                           if (numValue > maxAmount) {

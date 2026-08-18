@@ -69,7 +69,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   const canProcessRefund = () => {
-    return user?.role?.name === 'MANAGER' || user?.role?.name === 'ADMIN' || user?.role?.name === 'SUPER_ADMIN';
+    return (user?.role?.name === 'MANAGER' || user?.role?.name === 'ADMIN' || user?.role?.name === 'SUPER_ADMIN') && order?.status !== 'refunded';
   };
 
   if (isLoading) {

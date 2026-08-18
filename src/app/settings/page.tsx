@@ -363,10 +363,18 @@ export default function ProfileSettingsPage() {
           {/* Business Information - Admin Only */}
           {isAdmin && (
             <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm mt-6">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-900">
-                <Building2 className="w-5 h-5 text-slate-600" />
-                Business Information
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2 text-slate-900">
+                  <Building2 className="w-5 h-5 text-slate-600" />
+                  Business Information
+                </h2>
+                <button
+                  onClick={() => router.push('/settings/tax-categories')}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-sm"
+                >
+                  Manage Tax Categories
+                </button>
+              </div>
               
               <form onSubmit={handleBusinessSubmit} className="space-y-4">
                 <div>

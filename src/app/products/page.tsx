@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { productsService, Product } from '../../services/products.service';
 import { settingsService, BusinessSettings } from '../../services/settings.service';
-import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save, X, EyeIcon } from 'lucide-react';
+import { taxCategoriesService, TaxCategory } from '../../services/tax-categories.service';
+import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save, X, EyeIcon, Box, DollarSign, TrendingUp } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 export default function ProductsPage() {
@@ -17,6 +18,7 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [businessSettings, setBusinessSettings] = useState<BusinessSettings | null>(null);
+  const [taxCategories, setTaxCategories] = useState<TaxCategory[]>([]);
 
   const loadProducts = async () => {
     try {
@@ -36,12 +38,20 @@ export default function ProductsPage() {
       setBusinessSettings(data);
     } catch (error: any) {
       console.error('Failed to load business settings:', error);
-      // Don't show error - tax type is optional
+    }
+  };
+
+  const loadTaxCategories = async () => {
+    try {
+      const data = await taxCategoriesService.findAll();
+      setTaxCategories(data);
+    } catch (error: any) {
+      console.error('Failed to load tax categories:', error);
     }
   };
 
   useEffect(() => {
-    if (!_hasHydrated) return; // Wait for Zustand persist to hydrate from localStorage
+    if (!_hasHydrated) return;
 
     if (!isAuthenticated) {
       router.push('/login');
@@ -50,6 +60,7 @@ export default function ProductsPage() {
 
     loadProducts();
     loadBusinessSettings();
+    loadTaxCategories();
   }, [isAuthenticated, router, _hasHydrated]);
 
   const filteredProducts = products.filter(
@@ -76,7 +87,7 @@ export default function ProductsPage() {
     const totalStock = product.inventory && product.inventory.length > 0
       ? product.inventory.reduce((sum: number, inv: any) => sum + inv.quantity, 0)
       : 0;
-    
+
     setEditForm({
       name: product.name,
       description: product.description || '',
@@ -85,7 +96,7 @@ export default function ProductsPage() {
       stock: totalStock.toString(),
       sku: product.sku || '',
       barcode: product.barcode || '',
-      taxRate: product.taxRate?.toString() || '0',
+      taxCategoryId: (product as any).taxCategoryId || '',
     });
     setEditingId(product.id);
   };
@@ -97,7 +108,7 @@ export default function ProductsPage() {
         sellingPrice: parseFloat(editForm.sellingPrice),
         costPrice: parseFloat(editForm.costPrice),
         stock: parseInt(editForm.stock) || 0,
-        taxRate: parseFloat(editForm.taxRate) || 0,
+        taxCategoryId: editForm.taxCategoryId,
       };
 
       await productsService.update(id, productData);
@@ -115,219 +126,296 @@ export default function ProductsPage() {
     setEditForm({});
   };
 
+  const getStockStatus = (stock: number) => {
+    if (stock === 0) return { color: 'bg-red-50 text-red-600 border-red-200', label: 'Out of Stock' };
+    if (stock < 10) return { color: 'bg-amber-50 text-amber-600 border-amber-200', label: 'Low Stock' };
+    return { color: 'bg-emerald-50 text-emerald-600 border-emerald-200', label: 'In Stock' };
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-500">Loading...</div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-3 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium">Loading products...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-                {/* Back to Dashboard */}
+                <span className="font-medium">Back</span>
               </button>
-              <div className="border-l border-slate-200 pl-4">
-                <h1 className="text-2xl font-bold text-slate-900">Products</h1>
-                <p className="text-slate-600">Manage your product inventory</p>
+              <div className="border-l border-gray-200 pl-4">
+                <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+                <p className="text-gray-500 text-sm mt-1">Manage your product inventory</p>
               </div>
             </div>
-            {hasPermission('products.create') && (
-              <button
-                onClick={() => router.push('/products/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
-              >
-                <Plus className="w-5 h-5" />
-                Add Product
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              <div className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg">
+                <span className="font-semibold">{filteredProducts.length}</span>
+                <span className="ml-1 text-gray-500">Products</span>
+              </div>
+              {hasPermission('products.create') && (
+                <button
+                  onClick={() => router.push('/products/new')}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="font-medium">Add Product</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Cards */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Total Products</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{products.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Box className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Total Value</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  ${products.reduce((sum, p) => sum + Number(p.sellingPrice), 0).toFixed(2)}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Low Stock Items</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  {products.filter(p => {
+                    const stock = p.inventory?.reduce((sum: number, inv: any) => sum + inv.quantity, 0) || 0;
+                    return stock < 10;
+                  }).length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </div>
+        </div> */}
+
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search products by name, code, or SKU..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-shadow"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">SKU</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Product id</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Sell Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cost Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tax</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {filteredProducts.map((product) => {
-                const totalStock = product.inventory && product.inventory.length > 0
-                  ? product.inventory.reduce((sum: number, inv: any) => sum + inv.quantity, 0)
-                  : 0;
-                const isEditing = editingId === product.id;
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">SKU</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredProducts.map((product) => {
+                  const totalStock = product.inventory && product.inventory.length > 0
+                    ? product.inventory.reduce((sum: number, inv: any) => sum + inv.quantity, 0)
+                    : 0;
+                  const stockStatus = getStockStatus(totalStock);
+                  const isEditing = editingId === product.id;
 
-                return (
-                  <tr key={product.id} className="hover:bg-slate-50 transition-colors">
-                    {isEditing ? (
-                      <>
-                        <td className="px-6 py-4">
-                          <input
-                            type="text"
-                            value={editForm.name}
-                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <input
-                            type="text"
-                            value={editForm.sku}
-                            onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })}
-                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <input
-                            type="text"
-                            value={editForm.barcode}
-                            onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })}
-                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                          />
-                        </td>
-                        <td className="px-6 py-4 text-slate-500">{product.category?.name || '-'}</td>
-                        <td className="px-6 py-4">
-                          <input
-                            type="number"
-                            value={editForm.sellingPrice}
-                            onChange={(e) => setEditForm({ ...editForm, sellingPrice: e.target.value })}
-                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <input
-                            type="number"
-                            value={editForm.costPrice}
-                            onChange={(e) => setEditForm({ ...editForm, costPrice: e.target.value })}
-                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <input
-                            type="number"
-                            value={editForm.taxRate}
-                            onChange={(e) => setEditForm({ ...editForm, taxRate: e.target.value })}
-                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                            placeholder="0"
-                            min="0"
-                            step="0.01"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <input
-                            type="number"
-                            value={editForm.stock}
-                            onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })}
-                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                          />
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => handleSave(product.id)}
-                              className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors"
-                            >
-                              <Save className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={handleCancel}
-                              className="p-2 bg-slate-600 hover:bg-slate-700 text-white rounded transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-6 py-4 font-medium text-slate-900">{product.name}</td>
-                        <td className="px-6 py-4 text-slate-600">{product.sku || '-'}</td>
-                        <td className="px-6 py-4 text-slate-600">{product.barcode || '-'}</td>
-                        <td className="px-6 py-4 text-slate-600">{product.category?.name || '-'}</td>
-                        <td className="px-6 py-4 text-emerald-600 font-semibold">${Number(product.sellingPrice).toFixed(2)}</td>
-                        <td className="px-6 py-4 text-slate-600">${Number(product.costPrice).toFixed(2)}</td>
-                        <td className="px-6 py-4 text-slate-600">
-                          {/* {businessSettings?.taxType} */}
-                           {product.taxRate}%
-                        </td>
-                        <td className="px-6 py-4 text-slate-600">{totalStock}</td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            {hasPermission('products.view') && (
-                              <button
-                                onClick={() => router.push(`/products/${product.id}`)}
-                                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors"
+                  return (
+                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                      {isEditing ? (
+                        <>
+                          <td className="px-6 py-4">
+                            <input
+                              type="text"
+                              value={editForm.name}
+                              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <input
+                              type="text"
+                              value={editForm.sku}
+                              onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })}
+                              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </td>
+                          <td className="px-6 py-4 text-gray-500">{product.category?.name || '-'}</td>
+                          <td className="px-6 py-4">
+                            {taxCategories.length === 0 ? (
+                              <span className="text-gray-400 text-sm">No tax categories</span>
+                            ) : (
+                              <select
+                                value={editForm.taxCategoryId}
+                                onChange={(e) => setEditForm({ ...editForm, taxCategoryId: e.target.value })}
+                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               >
-                                <EyeIcon className="w-4 h-4" />
-                              </button>
+                                <option value="">Select type</option>
+                                {taxCategories.map((category) => (
+                                  <option key={category.id} value={category.id}>
+                                    {category.name}
+                                  </option>
+                                ))}
+                              </select>
                             )}
-                            {hasPermission('products.update') && (
+                          </td>
+                          <td className="px-6 py-4">
+                            <input
+                              type="number"
+                              value={editForm.sellingPrice}
+                              onChange={(e) => setEditForm({ ...editForm, sellingPrice: e.target.value })}
+                              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <input
+                              type="number"
+                              value={editForm.stock}
+                              onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })}
+                              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end gap-2">
                               <button
-                                onClick={() => handleEdit(product)}
-                                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors"
+                                onClick={() => handleSave(product.id)}
+                                className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                               >
-                                <Edit className="w-4 h-4" />
+                                <Save className="w-4 h-4" />
                               </button>
-                            )}
-                            {hasPermission('products.delete') && (
                               <button
-                                onClick={() => handleDelete(product.id)}
-                                className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded transition-colors"
+                                onClick={handleCancel}
+                                className="p-2.5 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <X className="w-4 h-4" />
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                            </div>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <Package className="w-5 h-5 text-gray-600" />
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900">{product.name}</p>
+                                <p className="text-xs text-gray-500">{product.barcode || product.sku || 'No barcode'}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-gray-600 font-medium">{product.sku || '-'}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                              {product.category?.name || 'Uncategorized'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                              {(product as any).taxCategory?.name || 'No Type'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="font-semibold text-gray-900">${Number(product.sellingPrice).toFixed(2)}</p>
+                            <p className="text-xs text-gray-500">Cost: ${Number(product.costPrice).toFixed(2)}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${stockStatus.color}`}>
+                              {totalStock} {stockStatus.label}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end gap-2">
+                              {hasPermission('products.view') && (
+                                <button
+                                  onClick={() => router.push(`/products/${product.id}`)}
+                                  className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                                  title="View"
+                                >
+                                  <EyeIcon className="w-4 h-4" />
+                                </button>
+                              )}
+                              {hasPermission('products.update') && (
+                                <button
+                                  onClick={() => handleEdit(product)}
+                                  className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                                  title="Edit"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                              )}
+                              {hasPermission('products.delete') && (
+                                <button
+                                  onClick={() => handleDelete(product.id)}
+                                  className="p-2.5 bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-600 rounded-lg transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
           {filteredProducts.length === 0 && (
-            <div className="text-center py-16">
-              <Package className="w-24 h-24 mx-auto mb-4 text-slate-300" />
-              <p className="text-xl text-slate-500">No products found</p>
+            <div className="text-center py-20">
+              <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                <Package className="w-10 h-10 text-gray-400" />
+              </div>
+              <p className="text-xl text-gray-500 font-medium">No products found</p>
+              <p className="text-gray-400 mt-2">Try adjusting your search or add a new product</p>
             </div>
           )}
         </div>

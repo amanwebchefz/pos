@@ -457,12 +457,12 @@ export default function RefundsPage() {
                     ${refundableOrder.totalRefundedAmount.toFixed(2)}
                   </p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-sm text-slate-500">Refundable Amount</p>
                   <p className="text-lg font-semibold text-emerald-600">
                     ${refundableOrder.totalRefundableAmount.toFixed(2)}
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
 

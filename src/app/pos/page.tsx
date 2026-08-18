@@ -157,7 +157,7 @@ export default function POSPage() {
     const totalStock = product.inventory && product.inventory.length > 0
       ? product.inventory.reduce((sum: number, inv: any) => sum + inv.quantity, 0)
       : 0;
-    
+
     // Check if product is out of stock
     if (totalStock === 0) {
       toast.error('Product is out of stock');
@@ -174,9 +174,10 @@ export default function POSPage() {
       return;
     }
 
-    const taxRate = product.taxRate || 0;
+    // Use category's tax category rate if available, otherwise fall back to product tax rate
+    const taxRate = product.category?.taxCategory?.taxRate || product.taxRate || 0;
     const itemTax = (product.sellingPrice * taxRate) / 100;
-    
+
     addItem({
       id: Date.now().toString(),
       productId: product.id,
@@ -185,6 +186,8 @@ export default function POSPage() {
       unitPrice: product.sellingPrice,
       discount: 0,
       tax: itemTax,
+      taxRate: taxRate,
+      taxCategoryId: product.category?.taxCategory?.id || null,
       // total: product?.sellingPrice,
     });
   };

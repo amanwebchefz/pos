@@ -8,6 +8,7 @@ export interface Product {
   sku?: string;
   description?: string;
   image?: string;
+  type: string;
   costPrice: number;
   sellingPrice: number;
   taxRate: number;
@@ -27,6 +28,19 @@ export interface Product {
   trackInventory: boolean;
   hasExpiry: boolean;
   inventory?: any[];
+  createdAt: string;
+  updatedAt: string;
+  taxCategory:TaxType;
+}
+
+export interface TaxType {
+  id: number;
+  name: string;
+  code: string;
+  description: string;
+  taxRate: string;
+  isActive: boolean;
+  businessId: number;
   createdAt: string;
   updatedAt: string;
 }

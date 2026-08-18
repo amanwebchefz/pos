@@ -4,10 +4,10 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { productsService, Product } from '@/services/products.service';
-import { categoriesService, Category } from '@/services/categories.service';
+import { categoriesService } from '@/services/categories.service';
+import { taxCategoriesService, TaxCategory } from '@/services/tax-categories.service';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { PermissionGuard } from '@/components/guards/PermissionGuard';
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -16,6 +16,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [isSaving, setIsSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [taxCategories, setTaxCategories] = useState<TaxCategory[]>([]);
+  const [isLoadingTaxCategories, setIsLoadingTaxCategories] = useState(false);
   const { id } = use(params);
 
   const [formData, setFormData] = useState({
@@ -27,6 +29,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     sku: '',
     barcode: '',
     stock: '',
+    taxCategoryId: '',
   });
 
   useEffect(() => {
@@ -46,6 +49,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     loadProduct();
     loadCategories();
+    loadTaxCategories();
   }, [isAuthenticated, router, _hasHydrated, id, hasPermission]);
 
   const loadProduct = async () => {
@@ -64,6 +68,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         sku: data.sku || '',
         barcode: data.barcode || '',
         stock: stockQuantity.toString(),
+        taxCategoryId: (data as any).taxCategoryId || '',
       });
     } catch (error: any) {
       console.error('Failed to load product:', error);
@@ -84,6 +89,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       toast.error(error.message || 'Failed to load categories');
     } finally {
       setIsLoadingCategories(false);
+    }
+  };
+
+  const loadTaxCategories = async () => {
+    setIsLoadingTaxCategories(true);
+    try {
+      const data = await taxCategoriesService.findAll();
+      setTaxCategories(data);
+    } catch (error: any) {
+      console.error('Failed to load tax categories:', error);
+      toast.error(error.message || 'Failed to load tax categories');
+    } finally {
+      setIsLoadingTaxCategories(false);
     }
   };
 
@@ -108,6 +126,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         costPrice: parseFloat(formData.costPrice),
         stock: parseInt(formData.stock) || 0,
         categoryId: formData.categoryId || undefined,
+        taxCategoryId: formData.taxCategoryId,
       };
 
       const resp = await productsService.update(id, productData);
@@ -122,8 +141,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   if (!_hasHydrated) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -135,38 +154,39 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Loading product...</div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-600">Loading product...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back to Product
+            <span className="font-medium">Back</span>
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Edit Product</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Edit Product</h1>
+          <p className="text-gray-500 mt-1">Update product information</p>
         </div>
 
         {/* Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-gray-50 rounded-xl border border-gray-200 p-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                 Basic Information
               </h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Name *
                 </label>
                 <input
@@ -175,13 +195,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Enter product name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Description
                 </label>
                 <textarea
@@ -189,13 +209,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   value={formData.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                   placeholder="Enter product description"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category
                 </label>
                 <select
@@ -203,7 +223,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   value={formData.categoryId}
                   onChange={handleChange}
                   disabled={isLoadingCategories}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   <option value="">Select a category</option>
                   {categories.map((category) => (
@@ -213,20 +233,48 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   ))}
                 </select>
                 {isLoadingCategories && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Loading categories...</p>
+                  <p className="text-sm text-gray-500 mt-1">Loading categories...</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Type
+                </label>
+                {taxCategories.length === 0 ? (
+                  <p className="text-sm text-red-500 mt-1">
+                    No tax categories available. Please initialize tax categories in settings.
+                  </p>
+                ) : (
+                  <select
+                    name="taxCategoryId"
+                    value={formData.taxCategoryId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="">Select product type</option>
+                    {taxCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {isLoadingTaxCategories && (
+                  <p className="text-sm text-gray-500 mt-1">Loading tax categories...</p>
                 )}
               </div>
             </div>
 
             {/* Pricing */}
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                 Pricing
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Selling Price *
                   </label>
                   <input
@@ -237,13 +285,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     required
                     step="0.01"
                     min="0"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Cost Price
                   </label>
                   <input
@@ -253,7 +301,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     onChange={handleChange}
                     step="0.01"
                     min="0"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="0.00"
                   />
                 </div>
@@ -262,13 +310,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
             {/* Inventory */}
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                 Inventory
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Stock Quantity
                   </label>
                   <input
@@ -277,13 +325,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     value={formData.stock}
                     onChange={handleChange}
                     min="0"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     SKU
                   </label>
                   <input
@@ -291,13 +339,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     name="sku"
                     value={formData.sku}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="SKU-001"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Barcode
                   </label>
                   <div className="flex gap-2">
@@ -306,13 +354,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                       name="barcode"
                       value={formData.barcode}
                       onChange={handleChange}
-                      className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="1234567890"
                     />
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, barcode: generateBarcode() })}
-                      className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500"
+                      className="px-4 py-3 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-medium whitespace-nowrap"
                     >
                       Generate
                     </button>
@@ -322,11 +370,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 px-6 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium"
               >
                 <X className="w-4 h-4" />
                 Cancel
@@ -334,7 +382,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 <Save className="w-4 h-4" />
                 {isSaving ? 'Saving...' : 'Save Changes'}
