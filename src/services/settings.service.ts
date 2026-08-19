@@ -1,4 +1,5 @@
 import axios from '../lib/axios';
+import { getCurrencySymbol } from '../utils/currency';
 
 export interface BusinessSettings {
   id: string;
@@ -36,5 +37,14 @@ export const settingsService = {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to update business settings';
       throw new Error(errorMessage);
     }
+  },
+
+  getCurrencySymbol(currencyCode?: string): string {
+    return getCurrencySymbol(currencyCode || 'USD');
+  },
+
+  formatCurrency(amount: number, currencyCode?: string): string {
+    const symbol = this.getCurrencySymbol(currencyCode);
+    return `${symbol}${amount.toFixed(2)}`;
   },
 };

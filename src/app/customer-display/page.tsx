@@ -578,7 +578,7 @@ function CustomerDisplayContent() {
         )}
         
         {/* Debug Status Indicator */}
-        <div className="fixed bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-slate-200 text-xs z-40">
+        {/* <div className="fixed bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-slate-200 text-xs z-40">
           <p className="font-bold mb-1">Debug Status:</p>
           <p>Paid: {isPaid ? '✅' : '❌'}</p>
           <p>Order Created: {orderCreated ? '✅' : '❌'}</p>
@@ -586,7 +586,7 @@ function CustomerDisplayContent() {
           <p>Popup: {showThankYouPopup ? '✅' : '❌'}</p>
           <p className="mt-2 text-slate-500">localStorage: {currentUserId ? '✅' : '❌'}</p>
           <p className="text-slate-500">Test: window.testCustomerDisplay.showThankYouPopup()</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
