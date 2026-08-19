@@ -15,12 +15,16 @@ export default function TaxCategoriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<TaxCategory | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<TaxCategory | null>(null);
+  const [deleteResult, setDeleteResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const [formData, setFormData] = useState<CreateTaxCategoryDto>({
     name: '',
     code: '',
     description: '',
     taxRate: 0,
+    isActive: true,
   });
 
   // Helper function to get role name safely
@@ -79,6 +83,7 @@ export default function TaxCategoriesPage() {
         code: category.code,
         description: category.description || '',
         taxRate: category.taxRate,
+        isActive: category.isActive,
       });
     } else {
       setEditingCategory(null);
@@ -87,6 +92,7 @@ export default function TaxCategoriesPage() {
         code: '',
         description: '',
         taxRate: 0,
+        isActive: true,
       });
     }
     setIsModalOpen(true);
@@ -100,6 +106,7 @@ export default function TaxCategoriesPage() {
       code: '',
       description: '',
       taxRate: 0,
+      isActive: true,
     });
   };
 
@@ -125,19 +132,35 @@ export default function TaxCategoriesPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this tax category?')) {
-      return;
-    }
+  const handleDeleteClick = (category: TaxCategory) => {
+    setCategoryToDelete(category);
+    setDeleteResult(null);
+    setDeleteModalOpen(true);
+  };
 
-    try {
-      await taxCategoriesService.delete(id);
-      toast.success('Tax category deleted successfully');
+  const handleDeleteConfirm = async () => {
+    if (!categoryToDelete) return;
+
+    const result = await taxCategoriesService.delete(categoryToDelete.id);
+
+    if (result.success) {
+      toast.success(result.message);
       loadTaxCategories();
-    } catch (error: any) {
-      console.error('Failed to delete tax category:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete tax category');
+      setDeleteModalOpen(false);
+      setCategoryToDelete(null);
+      setDeleteResult(null);
+    } else {
+      toast.error(result.message);
+      setDeleteModalOpen(false);
+      setCategoryToDelete(null);
+      setDeleteResult(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setCategoryToDelete(null);
+    setDeleteResult(null);
   };
 
   if (isLoading) {
@@ -252,7 +275,7 @@ export default function TaxCategoriesPage() {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(category.id)}
+                          onClick={() => handleDeleteClick(category)}
                           className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -336,6 +359,19 @@ export default function TaxCategoriesPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="w-5 h-5 text-slate-700 border-slate-300 rounded focus:ring-slate-400"
+                  />
+                  <span className="text-sm font-medium text-slate-700">Active</span>
+                </label>
+                {/* <p className="mt-1 text-xs text-slate-500">Enable or disable this tax category</p> */}
+              </div>
+
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
@@ -354,6 +390,36 @@ export default function TaxCategoriesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && categoryToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <h2 className="text-xl font-semibold text-slate-900">Delete Tax Category</h2>
+              </div>
+              <p className="text-slate-600 mb-6">
+                Are you sure you want to delete <span className="font-semibold text-slate-900">{categoryToDelete.name}</span>? This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

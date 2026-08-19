@@ -259,7 +259,8 @@ export default function RefundsPage() {
     selectedItems.forEach((data, itemId) => {
       const item = refundableOrder?.items.find(i => i.id === itemId);
       if (item) {
-        total += calculateItemRefundAmount(item, data.refundType as 'amount' | 'percent' | 'full', data.value);
+        const amount = calculateItemRefundAmount(item, data.refundType as 'amount' | 'percent' | 'full', Number(data.value));
+        total += Number(amount);
       }
     });
     return total;

@@ -220,7 +220,7 @@ export default function RefundHistoryPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <DollarSign className="w-4 h-4 text-emerald-500" />
+                            {/* <DollarSign className="w-4 h-4 text-emerald-500" /> */}
                             <span className="text-sm font-semibold text-slate-900">
                               ${Number(refund.amount).toFixed(2)}
                             </span>

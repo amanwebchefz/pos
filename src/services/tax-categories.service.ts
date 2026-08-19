@@ -17,6 +17,7 @@ export interface CreateTaxCategoryDto {
   code: string;
   description?: string;
   taxRate: number;
+  isActive?: boolean;
 }
 
 export interface UpdateTaxCategoryDto {
@@ -68,14 +69,9 @@ export const taxCategoriesService = {
     }
   },
 
-  async delete(id: number): Promise<{ message: string }> {
-    try {
-      const response = await axios.delete(`/tax-categories/${id}`);
-      return response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete tax category';
-      throw new Error(errorMessage);
-    }
+  async delete(id: number): Promise<{ success: boolean; message: string }> {
+    const response = await axios.delete(`/tax-categories/${id}`);
+    return response.data;
   },
 
   async initializeDefaultTaxCategories(): Promise<TaxCategory[]> {

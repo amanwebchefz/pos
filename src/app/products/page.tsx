@@ -44,7 +44,7 @@ export default function ProductsPage() {
   const loadTaxCategories = async () => {
     try {
       const data = await taxCategoriesService.findAll();
-      setTaxCategories(data);
+      setTaxCategories(data.filter(tc => tc.isActive));
     } catch (error: any) {
       console.error('Failed to load tax categories:', error);
     }

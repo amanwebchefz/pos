@@ -96,7 +96,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setIsLoadingTaxCategories(true);
     try {
       const data = await taxCategoriesService.findAll();
-      setTaxCategories(data);
+      setTaxCategories(data.filter(tc => tc.isActive));
     } catch (error: any) {
       console.error('Failed to load tax categories:', error);
       toast.error(error.message || 'Failed to load tax categories');

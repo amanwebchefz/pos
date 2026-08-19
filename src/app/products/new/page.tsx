@@ -61,7 +61,7 @@ export default function NewProductPage() {
     setIsLoadingTaxCategories(true);
     try {
       const data = await taxCategoriesService.findAll();
-      setTaxCategories(data);
+      setTaxCategories(data.filter(tc => tc.isActive));
     } catch (error) {
       console.error('Failed to load tax categories:', error);
       toast.error('Failed to load tax categories');
